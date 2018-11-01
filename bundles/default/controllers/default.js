@@ -5,7 +5,7 @@ const Controller = require('controller');
 /**
  * Create Core Controller class
  */
-class CoreController extends Controller {
+class DefaultController extends Controller {
 
   /**
    * Construct Home Controller class
@@ -39,6 +39,6 @@ class CoreController extends Controller {
 /**
  * Export Core Controller class
  *
- * @type {CoreController}
+ * @type {DefaultController}
  */
-exports = module.exports = CoreController;
+exports = module.exports = DefaultController;
