@@ -15,7 +15,7 @@ class DefaultController extends Controller {
     super();
 
     // Bind public methods
-    this.homeAction = this.homeAction.bind(this);
+    this.indexAction = this.indexAction.bind(this);
   }
 
   /**
