@@ -1,0 +1,51 @@
+{
+  "name": "@edenjs/core",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eden-js/core.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eden-js/core/issues"
+  },
+  "homepage": "https://github.com/eden-js/core#readme",
+  "dependencies": {
+    "babelify": "^10.0.0",
+    "browserify": "^16.2.3",
+    "dot-prop-immutable": "^1.5.0",
+    "fs-extra": "^7.0.0",
+    "glob-all": "^3.1.0",
+    "gulp": "^3.9.1",
+    "gulp-header": "^2.0.5",
+    "gulp-sourcemaps": "^2.6.4",
+    "gulp-uglify-es": "^1.0.4",
+    "os": "^0.1.1",
+    "path": "^0.12.7",
+    "through2": "^2.0.3",
+    "uuid": "^3.3.2",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0",
+    "@edenjs/admin": "^1.0.1",
+    "@edenjs/alert": "^1.0.1",
+    "@edenjs/asset": "^1.0.0",
+    "@edenjs/cache": "^1.0.0",
+    "@edenjs/cms": "^1.0.2",
+    "@edenjs/email": "^1.0.0",
+    "@edenjs/grid": "^1.0.2",
+    "@edenjs/locale": "^1.0.2",
+    "@edenjs/menu": "^1.0.0",
+    "@edenjs/meta": "^1.0.0",
+    "@edenjs/riot": "^1.0.2",
+    "@edenjs/router": "^1.0.0",
+    "@edenjs/serviceworker": "^1.0.1",
+    "@edenjs/socket": "^1.0.0",
+    "@edenjs/user": "^1.0.1"
+  }
+}
