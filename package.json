@@ -1,6 +1,6 @@
 {
   "name": "@edenjs/core",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -35,7 +35,7 @@
     "@edenjs/menu": "^1.0.0",
     "@edenjs/meta": "^1.0.0",
     "@edenjs/riot": "^1.0.2",
-    "@edenjs/router": "^1.0.0",
+    "@edenjs/router": "^1.0.1",
     "@edenjs/serviceworker": "^1.0.1",
     "@edenjs/socket": "^1.0.2",
     "@edenjs/user": "^1.0.2",
