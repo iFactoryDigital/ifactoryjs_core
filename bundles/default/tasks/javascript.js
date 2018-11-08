@@ -42,15 +42,22 @@ class JavascriptTask {
    * @return {Promise}
    */
   run () {
-    // Create javascript array
-    const entries = glob.sync([
-      global.appRoot + '/lib/bundles/*/public/js/bootstrap.js',
+    // create sync
+    let sync = [
       global.appRoot + '/node_modules/*/bundles/*/public/js/bootstrap.js',
-      global.appRoot + '/node_modules/*/*/bundles/*/public/js/bootstrap.js',
-      global.appRoot + '/app/bundles/node_modules/*/bundles/*/public/js/bootstrap.js',
-      global.appRoot + '/app/bundles/node_modules/*/*/bundles/*/public/js/bootstrap.js',
-      global.appRoot + '/app/bundles/*/public/js/bootstrap.js'
-    ]);
+      global.appRoot + '/node_modules/*/*/bundles/*/public/js/bootstrap.js'
+    ];
+
+    // loop modules
+    for (let mod of (config.get('modules') || [])) {
+      // add module
+      sync.push(mod + '/bundles/*/public/js/bootstrap.js');
+      sync.push(mod + '/bundles/node_modules/*/bundles/*/public/js/bootstrap.js');
+      sync.push(mod + '/bundles/node_modules/*/*/bundles/*/public/js/bootstrap.js');
+    }
+
+    // Create javascript array
+    const entries = glob.sync(sync);
 
     // Build vendor prepend
     let js   = config.get('js');
@@ -62,6 +69,7 @@ class JavascriptTask {
     });
 
     // Setup paths
+    let moduleRoots = (config.get('modules') || []).map((mod) => mod + '/node_modules');
     let daemonRoots = fs.existsSync(global.appRoot + '/cache/daemon.roots.json') ? require(global.appRoot + '/cache/daemon.roots.json') : [];
     let controllerRoots = fs.existsSync(global.appRoot + '/cache/controller.roots.json') ? require(global.appRoot + '/cache/controller.roots.json') : [];
 
@@ -70,6 +78,7 @@ class JavascriptTask {
       'paths' : [
         global.appRoot,
 
+        ...moduleRoots,
         ...daemonRoots,
         ...controllerRoots,
 
