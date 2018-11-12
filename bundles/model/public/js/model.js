@@ -31,6 +31,7 @@ class model extends events {
 
     // Bind methods
     this.get     = this.get.bind(this);
+    this.set     = this.set.bind(this);
     this.build   = this.build.bind(this);
     this.listen  = this.listen.bind(this);
     this.refresh = this.refresh.bind(this);
@@ -57,6 +58,21 @@ class model extends events {
 
     // Return this key
     return dotProp.get(this.__data, key);
+  }
+
+  /**
+   * Returns data key
+   *
+   * @param  {String} key
+   *
+   * @return {*}
+   */
+  set (key, value) {
+    // Return this key
+    this.__data = dotProp.set(this.__data, key, value);
+
+    // return get key
+    return this.get(key);
   }
 
   /**
