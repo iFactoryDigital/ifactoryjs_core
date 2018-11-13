@@ -113,7 +113,7 @@ class modelDaemon extends daemon {
     // Add sessionID to listeners
     listeners = listeners.filter((listener) => {
       // Return filtered
-      return listener.session !== sessionID && listener.uuid !== listenID;
+      return listener.uuid !== listenID;
     });
 
     // Set to eden again
