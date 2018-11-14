@@ -153,6 +153,9 @@ class model extends events {
     // Await building
     await this.building;
 
+    // check id
+    if (!this.__id) return;
+
     // Check listening
     await Promise.all(this.__queue);
 
