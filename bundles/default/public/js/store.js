@@ -3,7 +3,8 @@
 require('@babel/polyfill');
 
 // Require class dependencies
-const events = require('events');
+const events  = require('events');
+const dotProp = require('dot-prop');
 
 /**
  * Create Eden Store class
@@ -88,7 +89,7 @@ class EdenStore extends events {
     // Run sey hook
     this.hook('set', data, () => {
       // Set value in this
-      this[data.key] = data.val;
+      dotProp.set(this, data.key, data.val);
 
       // Emit value to key
       this.emit(data.key, data.val);
@@ -107,7 +108,7 @@ class EdenStore extends events {
    */
   get (key) {
     // Return from this
-    return this[key];
+    return dotProp.get(this, key);
   }
 
 
