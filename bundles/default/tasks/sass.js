@@ -18,18 +18,17 @@ const config = require('config');
  * @task sass
  */
 class SASSTask {
-
   /**
    * Construct SASS Task class
    *
    * @param {Loader} runner
    */
-  constructor (runner) {
+  constructor(runner) {
     // Set private variables
     this._runner = runner;
 
     // Bind public methods
-    this.run   = this.run.bind(this);
+    this.run = this.run.bind(this);
     this.watch = this.watch.bind(this);
 
     // Bind private methods
@@ -41,26 +40,26 @@ class SASSTask {
    *
    * @returns {Promise}
    */
-  run () {
+  run() {
     // Return new promise
     return new Promise((resolve) => {
       // Run tmp
       this._tmp().then(() => {
         // Run gulp task
-        gulp.src(global.appRoot + '/cache/tmp.scss')
+        gulp.src(`${global.appRoot}/data/cache/tmp.scss`)
           .pipe(sourcemaps.init())
           .pipe(sass({
-            'importer'    : importer,
-            'outputStyle' : 'compressed'
+            importer,
+            outputStyle : 'compressed',
           }))
           .pipe(prefix({
-            'browsers' : [
-              'last 2 versions'
-            ]
+            browsers : [
+              'last 2 versions',
+            ],
           }))
           .pipe(rename('app.min.css'))
-          .pipe(sourcemaps.write('./www/public/css'))
-          .pipe(gulp.dest('./www/public/css'))
+          .pipe(sourcemaps.write(`${global.appRoot}/data/www/public/css`))
+          .pipe(gulp.dest(`${global.appRoot}/data/www/public/css`))
           .on('end', resolve)
           .on('error', (err) => {
             // Log error
@@ -80,7 +79,7 @@ class SASSTask {
    *
    * @private
    */
-  _tmp () {
+  _tmp() {
     // Set variables
     let all = '';
 
@@ -92,8 +91,9 @@ class SASSTask {
 
     // Loop config sass files
     if (configSass) {
-      for (let i = 0; i < configSass.length; i++) {
-        sassFiles.push(configSass[i]);
+      for (let i = 0; i < configSass.length; i += 1) {
+        sassFiles.push(`${global.edenRoot}/${configSass[i]}`);
+        sassFiles.push(`${global.appRoot}/${configSass[i]}`);
       }
     }
 
@@ -104,7 +104,7 @@ class SASSTask {
     return new Promise((resolve, reject) => {
       // Run gulp on sass files
       gulp.src(sassFiles)
-        .pipe(through.obj(function (chunk, enc, cb) {
+        .pipe(through.obj(function thru(chunk, enc, cb) {
           // Run through callback
           let type = chunk.path.split('.');
 
@@ -114,16 +114,16 @@ class SASSTask {
           // Check type
           if (type === 'css') {
             // Prepend
-            let prepend = fs.readFileSync(chunk.path, 'utf8');
+            const prepend = fs.readFileSync(chunk.path, 'utf8');
 
             // Push to this
             this.push({
-              'all' : prepend + os.EOL
+              all : prepend + os.EOL,
             });
           } else {
             // Push to this
             this.push({
-              'all' : '@import "' + chunk.path + '";' + os.EOL
+              all : `@import "${chunk.path}";${os.EOL}`,
             });
           }
 
@@ -137,7 +137,7 @@ class SASSTask {
         })
         .on('end', () => {
           // Write temp sass file
-          fs.writeFileSync(global.appRoot + '/cache/tmp.scss', all);
+          fs.writeFileSync(`${global.appRoot}/data/cache/tmp.scss`, all);
 
           // Resolve
           resolve();
@@ -151,11 +151,10 @@ class SASSTask {
    *
    * @return {string[]}
    */
-  watch () {
+  watch() {
     // Return files
     return 'public/scss/**/*.scss';
   }
-
 }
 
 /**
@@ -163,4 +162,4 @@ class SASSTask {
  *
  * @type {SASSTask}
  */
-exports = module.exports = SASSTask;
+module.exports = SASSTask;

@@ -7,12 +7,12 @@ riot.mixin('model', {
   /**
    * On init function
    */
-  'init' : function () {
+  init() {
     // Set live models
     this.__model = [];
 
     // Let kill
-    let killAll = () => {
+    const killAll = () => {
       // Kill all models
       this.__model.forEach((model) => {
         // Destroy
@@ -21,7 +21,7 @@ riot.mixin('model', {
     };
 
     // On unmount
-    this.on('deafen',  killAll);
+    this.on('deafen', killAll);
     this.on('unmount', killAll);
   },
 
@@ -33,9 +33,9 @@ riot.mixin('model', {
    *
    * @return {FEModel}
    */
-  'model' : function (type, object) {
+  model(type, object) {
     // Create model
-    let Model = new FEModel(type, object);
+    const Model = new FEModel(type, object);
 
     // Push new live model
     this.__model.push(Model);
@@ -45,5 +45,5 @@ riot.mixin('model', {
 
     // Return model
     return Model;
-  }
+  },
 });

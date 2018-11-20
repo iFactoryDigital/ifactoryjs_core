@@ -11,22 +11,21 @@ const socket = helper('socket');
  * @extends daemon
  */
 class modelDaemon extends daemon {
-
   /**
    * Constructor
    */
-  constructor () {
+  constructor() {
     // Run arguments
     super(...arguments);
 
     // Bind build
-    this.build  = this.build.bind(this);
+    this.build = this.build.bind(this);
     this.models = new Map();
 
     // Bind private methods
-    this._save    = this._save.bind(this);
-    this._deafen  = this._deafen.bind(this);
-    this._listen  = this._listen.bind(this);
+    this._save = this._save.bind(this);
+    this._deafen = this._deafen.bind(this);
+    this._listen = this._listen.bind(this);
     this._collect = this._collect.bind(this);
 
     // Bind building
@@ -36,7 +35,7 @@ class modelDaemon extends daemon {
   /**
    * Build live daemon
    */
-  build () {
+  build() {
     // Add endpoint for listen
     this.eden.endpoint('model.listen', this._listen, true);
     this.eden.endpoint('model.deafen', this._deafen, true);
@@ -52,19 +51,19 @@ class modelDaemon extends daemon {
    * On model save
    * @param  {Object}  opts
    */
-  async _save (opts) {
+  async _save(opts) {
     // Check models has
     if (!this.models.has(opts.model)) return;
 
     // Get cache
-    let listeners = await this.eden.get('model.listen.' + opts.model.toLowerCase() + '.' + opts.id) || [];
+    const listeners = await this.eden.get(`model.listen.${opts.model.toLowerCase()}.${opts.id}`) || [];
 
     // Check length
     if (!listeners.length) return;
 
     // Log to eden
-    this.logger.log('debug', 'Sending live response on ' + opts.model.toLowerCase() + ' #' + opts.id, {
-      'class' : this.constructor.name
+    this.logger.log('debug', `Sending live response on ${opts.model.toLowerCase()} #${opts.id}`, {
+      class : this.constructor.name,
     });
 
     // Get model
@@ -74,13 +73,13 @@ class modelDaemon extends daemon {
     Model = await Model.findById(opts.id);
 
     // Emit sanitised
-    let sent      = [];
-    let sanitised = await Model.sanitise();
+    const sent      = [];
+    const sanitised = await Model.sanitise();
 
     // Loop listeners
     listeners.forEach((listener) => {
       // Emit to socket
-      if (!sent.includes(listener.session)) socket.session(listener.session, 'model.update.' + opts.model.toLowerCase() + '.' + opts.id, sanitised);
+      if (!sent.includes(listener.session)) socket.session(listener.session, `model.update.${opts.model.toLowerCase()}.${opts.id}`, sanitised);
 
       // Push to sent
       sent.push(listener.session);
@@ -95,20 +94,20 @@ class modelDaemon extends daemon {
    * @param  {String}  id
    * @param  {String}  listenID
    */
-  async _deafen (sessionID, type, id, listenID) {
+  async _deafen(sessionID, type, id, listenID) {
     // Set model
     if (!this.models.has(type)) this.models.set(type, true);
 
     // Log to eden
-    this.logger.log('debug', 'removing model listener on ' + type + ' #' + id + ' for ' + sessionID, {
-      'class' : 'modelDaemon'
+    this.logger.log('debug', `removing model listener on ${type} #${id} for ${sessionID}`, {
+      class : 'modelDaemon',
     });
 
     // Lock listen
-    let unlock = await this.eden.lock('model.listen.' + type + '.' + id);
+    const unlock = await this.eden.lock(`model.listen.${type}.${id}`);
 
     // Set cache
-    let listeners = await this.eden.get('model.listen.' + type + '.' + id) || [];
+    let listeners = await this.eden.get(`model.listen.${type}.${id}`) || [];
 
     // Add sessionID to listeners
     listeners = listeners.filter((listener) => {
@@ -117,7 +116,7 @@ class modelDaemon extends daemon {
     });
 
     // Set to eden again
-    await this.eden.set('model.listen.' + type + '.' + id, listeners, 60 * 60 * 1000);
+    await this.eden.set(`model.listen.${type}.${id}`, listeners, 60 * 60 * 1000);
 
     // Unlock live listen set
     unlock();
@@ -131,23 +130,23 @@ class modelDaemon extends daemon {
    * @param  {String}  id
    * @param  {String}  listenID
    */
-  async _listen (sessionID, type, id, listenID) {
+  async _listen(sessionID, type, id, listenID) {
     // Set model
     if (!this.models.has(type)) this.models.set(type, true);
 
     // Log to eden
-    this.logger.log('debug', 'adding model listener on ' + type + ' #' + id + ' for ' + sessionID, {
-      'class' : 'modelDaemon'
+    this.logger.log('debug', `adding model listener on ${type} #${id} for ${sessionID}`, {
+      class : 'modelDaemon',
     });
 
     // Lock listen
-    let unlock = await this.eden.lock('model.listen.' + type + '.' + id);
+    const unlock = await this.eden.lock(`model.listen.${type}.${id}`);
 
     // Set cache
-    let listeners = await this.eden.get('model.listen.' + type + '.' + id) || [];
+    const listeners = await this.eden.get(`model.listen.${type}.${id}`) || [];
 
     // Check found
-    let found = listeners.find((listener) => {
+    const found = listeners.find((listener) => {
       // Return filtered
       return listener.session === sessionID && listener.uuid === listenID;
     });
@@ -159,14 +158,14 @@ class modelDaemon extends daemon {
     } else {
       // Push listener
       listeners.push({
-        'uuid'    : listenID,
-        'last'    : new Date(),
-        'session' : sessionID
+        uuid    : listenID,
+        last    : new Date(),
+        session : sessionID,
       });
     }
 
     // Set to eden again
-    await this.eden.set('model.listen.' + type + '.' + id, listeners, 60 * 60 * 1000);
+    await this.eden.set(`model.listen.${type}.${id}`, listeners, 60 * 60 * 1000);
 
     // Unlock live listen set
     unlock();
@@ -175,7 +174,7 @@ class modelDaemon extends daemon {
   /**
    * Removes all listeners
    */
-  async _collect () {
+  async _collect() {
 
   }
 }

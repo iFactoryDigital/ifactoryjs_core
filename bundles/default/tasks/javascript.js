@@ -21,18 +21,17 @@ const config = require('config');
  * @task javascript
  */
 class JavascriptTask {
-
   /**
    * Construct Javascript Task class
    *
    * @param {Loader} runner
    */
-  constructor (runner) {
+  constructor(runner) {
     // Set private variables
     this._runner = runner;
 
     // Bind public methods
-    this.run   = this.run.bind(this);
+    this.run = this.run.bind(this);
     this.watch = this.watch.bind(this);
   }
 
@@ -41,71 +40,76 @@ class JavascriptTask {
    *
    * @return {Promise}
    */
-  run () {
+  run() {
     // create sync
-    let sync = [
-      global.appRoot + '/node_modules/*/bundles/*/public/js/bootstrap.js',
-      global.appRoot + '/node_modules/*/*/bundles/*/public/js/bootstrap.js'
+    const sync = [
+      `${global.edenRoot}/node_modules/*/bundles/*/public/js/bootstrap.js`,
+      `${global.edenRoot}/node_modules/*/*/bundles/*/public/js/bootstrap.js`,
     ];
 
     // loop modules
-    for (let mod of (config.get('modules') || [])) {
+    for (const mod of (config.get('modules') || [])) {
       // add module
-      sync.push(mod + '/bundles/*/public/js/bootstrap.js');
-      sync.push(mod + '/bundles/node_modules/*/bundles/*/public/js/bootstrap.js');
-      sync.push(mod + '/bundles/node_modules/*/*/bundles/*/public/js/bootstrap.js');
+      sync.push(`${mod}/*/public/js/bootstrap.js`);
+      sync.push(`${mod}/node_modules/*/bundles/*/public/js/bootstrap.js`);
+      sync.push(`${mod}/node_modules/*/*/bundles/*/public/js/bootstrap.js`);
     }
 
     // Create javascript array
     const entries = glob.sync(sync);
 
     // Build vendor prepend
-    let js   = config.get('js');
+    const js   = config.get('js');
     let head = '';
 
     // Loop javascript
     (js || []).forEach((file) => {
-      head += fs.readFileSync(file, 'utf8') + os.EOL;
+      if (fs.existsSync(`${global.edenRoot}/${file}`)) {
+        head += fs.readFileSync(`${global.edenRoot}/${file}`, 'utf8') + os.EOL;
+      } else {
+        head += fs.readFileSync(`${global.appRoot}/${file}`, 'utf8') + os.EOL;
+      }
     });
 
     // Setup paths
-    let moduleRoots = (config.get('modules') || []).map((mod) => mod + '/node_modules');
-    let daemonRoots = fs.existsSync(global.appRoot + '/cache/daemon.roots.json') ? require(global.appRoot + '/cache/daemon.roots.json') : [];
-    let controllerRoots = fs.existsSync(global.appRoot + '/cache/controller.roots.json') ? require(global.appRoot + '/cache/controller.roots.json') : [];
+    const moduleRoots = (config.get('modules') || []).map(mod => `${mod}/node_modules`);
+    const daemonRoots = fs.existsSync(`${global.appRoot}/data/cache/daemon.roots.json`) ? require(`${global.appRoot}/data/cache/daemon.roots.json`) : []; // eslint-disable-line global-require, import/no-dynamic-require
+    const controllerRoots = fs.existsSync(`${global.appRoot}/data/cache/controller.roots.json`) ? require(`${global.appRoot}/data/cache/controller.roots.json`) : []; // eslint-disable-line global-require, import/no-dynamic-require
 
     // Browserify javascript
     let job = browserify({
-      'paths' : [
-        global.appRoot,
+      paths : [
+        `${global.appRoot}/data`,
 
         ...moduleRoots,
         ...daemonRoots,
         ...controllerRoots,
 
-        global.appRoot + '/node_modules',
-        global.appRoot + '/app/bundles/node_modules'
+        `${global.edenRoot}/node_modules`,
+        `${global.appRoot}/bundles/node_modules`,
+        `${global.appRoot}/bundles`,
       ],
-      'debug'         : true,
-      'entries'       : entries,
-      'ignoreGlobals' : true
+      debug         : true,
+      entries,
+      ignoreGlobals : true,
     })
       .transform(babelify, {
-        'presets' : [['@babel/preset-env', {
-          'targets' : {
-            'browsers' : ['> 1%', 'last 2 versions', 'not ie <= 8']
+        presets : [['@babel/preset-env', {
+          targets : {
+            browsers : ['> 1%', 'last 2 versions', 'not ie <= 8'],
           },
-          'useBuiltIns' : 'entry'
+          useBuiltIns : 'entry',
         }]],
-        'plugins' : ['array-includes', '@babel/plugin-transform-classes', '@babel/plugin-transform-async-to-generator', ['@babel/transform-runtime', {
-          'helpers'     : false,
-          'regenerator' : true
-        }]]
+        plugins : ['array-includes', '@babel/plugin-transform-classes', '@babel/plugin-transform-async-to-generator', ['@babel/transform-runtime', {
+          helpers     : false,
+          regenerator : true,
+        }]],
       })
       .bundle()
       .pipe(source('app.min.js'))
       .pipe(buffer())
       .pipe(sourcemaps.init({
-        'loadMaps' : true
+        loadMaps : true,
       }))
       .pipe(header(head));
 
@@ -113,18 +117,18 @@ class JavascriptTask {
     if (['live', 'production'].includes(config.get('environment'))) {
       // Pipe uglify
       job = job.pipe(uglify({
-        'ie8'    : false,
-        'mangle' : true,
-        'output' : {
-          'comments' : false
+        ie8    : false,
+        mangle : true,
+        output : {
+          comments : false,
         },
-        'compress' : true
+        compress : true,
       }));
     }
 
     // Pipe job
-    job = job.pipe(sourcemaps.write(global.appRoot + '/www/public/js'))
-      .pipe(gulp.dest(global.appRoot + '/www/public/js'))
+    job = job.pipe(sourcemaps.write(`${global.appRoot}/data/www/public/js`))
+      .pipe(gulp.dest(`${global.appRoot}/data/www/public/js`))
       .on('end', () => {
         // Restart server
         this._runner.restart();
@@ -139,13 +143,12 @@ class JavascriptTask {
    *
    * @return {String[]}
    */
-  watch () {
+  watch() {
     // Return files
     return [
-      'public/js/**/*.js'
+      'public/js/**/*.js',
     ];
   }
-
 }
 
 /**
@@ -153,4 +156,4 @@ class JavascriptTask {
  *
  * @type {JavascriptTask}
  */
-exports = module.exports = JavascriptTask;
+module.exports = JavascriptTask;

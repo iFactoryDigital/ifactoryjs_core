@@ -8,11 +8,10 @@ const helper = require('helper');
  * @extends helper
  */
 class ModelHelper extends helper {
-
   /**
    * Construct model helper
    */
-  constructor () {
+  constructor() {
     // Run super
     super();
 
@@ -30,7 +29,7 @@ class ModelHelper extends helper {
    *
    * @returns {Promise}
    */
-  deafen (sessionID, Model, listenID) {
+  deafen(sessionID, Model, listenID) {
     // Call local
     return this.eden.thread('compute', 0).call('model.deafen', sessionID, Model.constructor.name.toLowerCase(), Model.get('_id').toString(), listenID);
   }
@@ -44,7 +43,7 @@ class ModelHelper extends helper {
    *
    * @returns {Promise}
    */
-  listen (sessionID, Model, listenID) {
+  listen(sessionID, Model, listenID) {
     // Call local
     return this.eden.thread('compute', 0).call('model.listen', sessionID, Model.constructor.name.toLowerCase(), Model.get('_id').toString(), listenID);
   }

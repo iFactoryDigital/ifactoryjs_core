@@ -11,18 +11,17 @@ const parser = require('lib/utilities/parser');
  * @task controllers
  */
 class ControllersTask {
-
   /**
    * Construct Controllers Task class
    *
    * @param {Loader} runner
    */
-  constructor (runner) {
+  constructor(runner) {
     // Set private variables
     this._runner = runner;
 
     // Bind public methods
-    this.run   = this.run.bind(this);
+    this.run = this.run.bind(this);
     this.watch = this.watch.bind(this);
   }
 
@@ -31,7 +30,7 @@ class ControllersTask {
    *
    * @return {Promise}
    */
-  run () {
+  run() {
     // Set config
     const roots  = [];
     const config = {};
@@ -52,7 +51,7 @@ class ControllersTask {
         // Check roots includes
         if (!roots.includes(bundles)) {
           // Push to roots
-          roots.push(bundles + '/bundles');
+          roots.push(`${bundles}/bundles`);
         }
 
         // Run callback
@@ -81,14 +80,13 @@ class ControllersTask {
    *
    * @return {string[]}
    */
-  watch () {
+  watch() {
     // Return files
     return [
       'controllers/**/*.js',
-      'helpers/**/*.js'
+      'helpers/**/*.js',
     ];
   }
-
 }
 
 /**

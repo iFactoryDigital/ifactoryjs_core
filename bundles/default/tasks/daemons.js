@@ -11,18 +11,17 @@ const parser = require('lib/utilities/parser');
  * @task daemons
  */
 class DaemonsTask {
-
   /**
    * Construct Daemons Task class
    *
    * @param {Loader} runner
    */
-  constructor (runner) {
+  constructor(runner) {
     // Set private variables
     this._runner = runner;
 
     // Bind public methods
-    this.run   = this.run.bind(this);
+    this.run = this.run.bind(this);
     this.watch = this.watch.bind(this);
   }
 
@@ -33,7 +32,7 @@ class DaemonsTask {
    *
    * @returns {Promise}
    */
-  run (files) {
+  run(files) {
     // Set variables
     const roots = [];
     const daemons = {};
@@ -54,7 +53,7 @@ class DaemonsTask {
         // Check roots includes
         if (!roots.includes(bundles)) {
           // Push to roots
-          roots.push(bundles + '/bundles');
+          roots.push(`${bundles}/bundles`);
         }
 
         // Run callback
@@ -75,13 +74,12 @@ class DaemonsTask {
    *
    * @return {string[]}
    */
-  watch () {
+  watch() {
     // Return files
     return [
-      'daemons/**/*.js'
+      'daemons/**/*.js',
     ];
   }
-
 }
 
 /**
@@ -89,4 +87,4 @@ class DaemonsTask {
  *
  * @type {DaemonsTask}
  */
-exports = module.exports = DaemonsTask;
+module.exports = DaemonsTask;

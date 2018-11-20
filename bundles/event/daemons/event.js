@@ -7,21 +7,20 @@ const Daemon = require('daemon');
  * @compute 0
  */
 class EventDaemon extends Daemon {
-
   /**
    * Construct Event Daemon class
    */
-  constructor () {
+  constructor() {
     // Run super
     super();
 
     // Set private variables
-    this._prefix    = 'eden.events.Daemon';
+    this._prefix = 'eden.events.Daemon';
     this._endpoints = {};
 
     // Bind private methods
-    this._build           = this._build.bind(this);
-    this._onEndpointAdd   = this._onEndpointAdd.bind(this);
+    this._build = this._build.bind(this);
+    this._onEndpointAdd = this._onEndpointAdd.bind(this);
     this._onEndpointCount = this._onEndpointCount.bind(this);
 
     // Run build
@@ -33,7 +32,7 @@ class EventDaemon extends Daemon {
    *
    * @private
    */
-  _build () {
+  _build() {
     // Set endpoint add endpoint
     this.eden.endpoint(`${this._prefix}.endpoint.add`, this._onEndpointAdd, true);
 
@@ -52,7 +51,7 @@ class EventDaemon extends Daemon {
    *
    * @async
    */
-  async _onEndpointAdd (event) {
+  async _onEndpointAdd(event) {
     // Lock endpoints
     const mutex = await this.eden.lock(`${this._prefix}.endpoint.lock`);
 
@@ -83,7 +82,7 @@ class EventDaemon extends Daemon {
    *
    * @async
    */
-  async _onEndpointCount (event) {
+  async _onEndpointCount(event) {
     // Lock endpoints
     const mutex = await this.eden.lock(`${this._prefix}.endpoint.lock`);
 
@@ -102,7 +101,6 @@ class EventDaemon extends Daemon {
     // Return endpoints
     return endpoints;
   }
-
 }
 
 /**

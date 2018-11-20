@@ -10,13 +10,12 @@ const dotProp = require('dot-prop');
  * Create Eden Store class
  */
 class EdenStore extends events {
-
   /**
    * Construct Eden Store class
    */
-  constructor () {
+  constructor(...args) {
     // Run super
-    super(...arguments);
+    super(...args);
 
     // Set public variables
     this.bound = 'true';
@@ -25,7 +24,7 @@ class EdenStore extends events {
     this._hooks = {};
 
     // Bind public methods
-    this.init  = this.init.bind(this);
+    this.init = this.init.bind(this);
     this.clear = this.clear.bind(this);
 
     // Check window and init
@@ -40,9 +39,9 @@ class EdenStore extends events {
    *
    * @param {object} variables
    */
-  init (variables) {
+  init(variables) {
     // Loop keys
-    for (const key in variables) {
+    for (const key of Object.keys(variables)) {
       // Set variable value
       this[key] = variables[key];
     }
@@ -51,20 +50,17 @@ class EdenStore extends events {
   /**
    * Clear store
    */
-  clear () {
+  clear() {
     // Set methods
     const methods = ['set', 'get', 'pre', 'post', 'hook', '_hooks', '__hook'];
 
     // Loop this
-    for (const key in this) {
-      // Check this has key
-      if (this.hasOwnProperty(key)) {
-        // Check if method
-        if (methods.includes(key)) continue;
+    for (const key of Object.keys(this)) {
+      // Check if method
+      if (methods.includes(key)) continue;
 
-        // Remove
-        delete this[key];
-      }
+      // Remove
+      delete this[key];
     }
 
     // Check user
@@ -79,11 +75,11 @@ class EdenStore extends events {
    *
    * @return {EdenStore}
    */
-  set (key, val) {
+  set(key, val) {
     // Set data
     const data = {
-      'key' : key,
-      'val' : val
+      key,
+      val,
     };
 
     // Run sey hook
@@ -106,17 +102,17 @@ class EdenStore extends events {
    *
    * @return {*}
    */
-  get (key) {
+  get(key) {
     // Return from this
     return dotProp.get(this, key);
   }
 
 
-  // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // /////////////////////////////////////////////////////////////////////////////////////////////
   //
   //  Hook Methods
   //
-  // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // /////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Add pre-hook to act as pre
@@ -124,7 +120,7 @@ class EdenStore extends events {
    * @param {string}   hook
    * @param {function} fn
    */
-  pre (hook, fn) {
+  pre(hook, fn) {
     // Check hook
     this.__hook(hook);
 
@@ -138,7 +134,7 @@ class EdenStore extends events {
    * @param {string}   hook
    * @param {function} fn
    */
-  post (hook, fn) {
+  post(hook, fn) {
     // Check hook
     this.__hook(hook);
 
@@ -153,18 +149,20 @@ class EdenStore extends events {
    * @param {string} hook
    * @param {array}  args
    */
-  async hook (hook, ...args) {
+  async hook(hook, ...args) {
     // Set fn
     let fn = false;
 
     // Get function
-    if (args.length > 1 && args[args.length - 1] instanceof Function && typeof args[args.length - 1] === 'function' && args[args.length - 1].call) fn = args.splice(-1)[0];
+    if (args.length > 1 && args[args.length - 1] instanceof Function && typeof args[args.length - 1] === 'function' && args[args.length - 1].call) {
+      [fn] = args.splice(-1);
+    }
 
     // Check hook
     this.__hook(hook);
 
     // Loop pre functions
-    for (let a = 0; a < this._hooks[hook].pre.length; a++) {
+    for (let a = 0; a < this._hooks[hook].pre.length; a += 1) {
       // Exec pre functions
       await this._hooks[hook].pre[a](...args);
     }
@@ -173,7 +171,7 @@ class EdenStore extends events {
     if (fn) await fn(...args);
 
     // Loop post functions
-    for (let b = 0; b < this._hooks[hook].post.length; b++) {
+    for (let b = 0; b < this._hooks[hook].post.length; b += 1) {
       // Exec post function
       await this._hooks[hook].post[b](...args);
     }
@@ -186,14 +184,15 @@ class EdenStore extends events {
    *
    * @private
    */
-  __hook (hook) {
+  __hook(hook) {
     // Ensure hook exists
-    if (!this._hooks[hook]) this._hooks[hook] = {
-      'pre'  : [],
-      'post' : []
-    };
+    if (!this._hooks[hook]) {
+      this._hooks[hook] = {
+        pre  : [],
+        post : [],
+      };
+    }
   }
-
 }
 
 /**
@@ -208,7 +207,7 @@ const built = new EdenStore();
  *
  * @type {EdenStore}
  */
-exports = module.exports = built;
+module.exports = built;
 
 /**
  * Export Eden Store instance to window

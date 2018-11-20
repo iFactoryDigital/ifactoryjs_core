@@ -6,11 +6,10 @@ const Controller = require('controller');
  * Create Core Controller class
  */
 class DefaultController extends Controller {
-
   /**
    * Construct Home Controller class
    */
-  constructor () {
+  constructor() {
     // Run super
     super();
 
@@ -29,11 +28,10 @@ class DefaultController extends Controller {
    * @menu     {MAIN} Home
    * @priority 1
    */
-  indexAction (req, res) {
+  indexAction(req, res) {
     // Render home page
     res.render('home');
   }
-
 }
 
 /**
@@ -41,4 +39,4 @@ class DefaultController extends Controller {
  *
  * @type {DefaultController}
  */
-exports = module.exports = DefaultController;
+module.exports = DefaultController;

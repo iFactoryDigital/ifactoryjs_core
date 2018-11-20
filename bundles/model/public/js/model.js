@@ -12,33 +12,32 @@ let socket = null;
  * @extends events
  */
 class model extends events {
-
   /**
    * Construct model class
    *
    * @param {String} type
    * @param {Object} object
    */
-  constructor (type, object) {
+  constructor(type, object) {
     // Run super
     super();
 
     // Set id
-    this.__id    = object.id;
-    this.__data  = object;
-    this.__type  = type;
+    this.__id = object.id;
+    this.__data = object;
+    this.__type = type;
     this.__queue = [];
 
     // Bind methods
-    this.get     = this.get.bind(this);
-    this.set     = this.set.bind(this);
-    this.build   = this.build.bind(this);
-    this.listen  = this.listen.bind(this);
+    this.get = this.get.bind(this);
+    this.set = this.set.bind(this);
+    this.build = this.build.bind(this);
+    this.listen = this.listen.bind(this);
     this.refresh = this.refresh.bind(this);
     this.destroy = this.destroy.bind(this);
 
     // Bind private methods
-    this._update  = this._update.bind(this);
+    this._update = this._update.bind(this);
     this._connect = this._connect.bind(this);
 
     // Build
@@ -52,7 +51,7 @@ class model extends events {
    *
    * @return {*}
    */
-  get (key) {
+  get(key) {
     // Check key
     if (!key || !key.length) return this.__data;
 
@@ -67,7 +66,7 @@ class model extends events {
    *
    * @return {*}
    */
-  set (key, value) {
+  set(key, value) {
     // Return this key
     this.__data = dotProp.set(this.__data, key, value);
 
@@ -78,7 +77,7 @@ class model extends events {
   /**
    * Builds this
    */
-  async build () {
+  async build() {
     // Check if window
     if (typeof window !== 'undefined') socket = require('socket/public/js/bootstrap');
 
@@ -91,7 +90,7 @@ class model extends events {
    *
    * @return {Promise}
    */
-  async destroy () {
+  async destroy() {
     // Await building
     await this.building;
 
@@ -102,15 +101,15 @@ class model extends events {
     if (!socket || !this.__isListening) return;
 
     // Create new promise
-    let promise = new Promise(async (resolve) => {
+    const promise = new Promise(async (resolve) => {
       // Call eden
-      await socket.call('model.deafen.' + this.__type, this.__id, this.__uuid);
+      await socket.call(`model.deafen.${this.__type}`, this.__id, this.__uuid);
 
       // Set listen
       this.__isListening = false;
 
       // Add on event
-      socket.off('model.update.' + this.__type + '.' + this.__id, this._update);
+      socket.off(`model.update.${this.__type}.${this.__id}`, this._update);
 
       // Listen to connect again
       socket.off('connect', this._connect);
@@ -130,7 +129,7 @@ class model extends events {
   /**
    * Refreshes this
    */
-  async refresh () {
+  async refresh() {
     // Await building
     await this.building;
 
@@ -138,7 +137,7 @@ class model extends events {
     if (!socket) return;
 
     // Call eden
-    let object = await socket.call('model.refresh.' + this.__type, this.__id);
+    const object = await socket.call(`model.refresh.${this.__type}`, this.__id);
 
     // Run update
     this._update(object);
@@ -149,7 +148,7 @@ class model extends events {
    *
    * @return {Promise}
    */
-  async listen () {
+  async listen() {
     // Await building
     await this.building;
 
@@ -166,15 +165,15 @@ class model extends events {
     if (!this.__uuid) this.__uuid = uuid();
 
     // Create new promise
-    let promise = new Promise(async (resolve) => {
+    const promise = new Promise(async (resolve) => {
       // Call eden
-      await socket.call('model.listen.' + this.__type, this.__id, this.__uuid);
+      await socket.call(`model.listen.${this.__type}`, this.__id, this.__uuid);
 
       // Set listen
       this.__isListening = true;
 
       // Add on event
-      socket.on('model.update.' + this.__type + '.' + this.__id, this._update);
+      socket.on(`model.update.${this.__type}.${this.__id}`, this._update);
 
       // Listen to connect again
       socket.on('connect', this._connect);
@@ -196,9 +195,9 @@ class model extends events {
    *
    * @param  {Object} object
    */
-  _update (object) {
+  _update(object) {
     // Update details
-    for (let key in object) {
+    for (const key in object) {
       // Check differences
       if (this.__data[key] !== object[key]) {
         // Listen to object key
@@ -216,11 +215,11 @@ class model extends events {
   /**
    * On socket reconnect
    */
-  _connect () {
+  _connect() {
     // Reconnected
     if (this.__isListening) {
       // Call live listen again
-      socket.call('model.listen.' + this.__type, this.__id, this.__uuid);
+      socket.call(`model.listen.${this.__type}`, this.__id, this.__uuid);
     }
   }
 }

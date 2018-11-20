@@ -8,11 +8,10 @@ const Helper = require('helper');
  * Create Event Helper class
  */
 class EventHelper extends Helper {
-
   /**
    * Construct Event Helper class
    */
-  constructor () {
+  constructor() {
     // Run super
     super();
 
@@ -20,7 +19,7 @@ class EventHelper extends Helper {
     this._prefix = 'eden.events.daemon';
 
     // Bind public methods
-    this.call     = this.call.bind(this);
+    this.call = this.call.bind(this);
     this.endpoint = this.endpoint.bind(this);
   }
 
@@ -34,13 +33,13 @@ class EventHelper extends Helper {
    *
    * @async
    */
-  async call (event, ...args) {
+  async call(event, ...args) {
     // Set emission
     const emission = {
-      'id'    : uuid(),
-      'event' : event,
-      'count' : await this.eden.call(`${this._prefix}.endpoint.count`, event, true),
-      'args'  : args || []
+      id    : uuid(),
+      event,
+      count : await this.eden.call(`${this._prefix}.endpoint.count`, event, true),
+      args  : args || [],
     };
 
     // Create result promise
@@ -71,7 +70,7 @@ class EventHelper extends Helper {
    * @param {string}   event
    * @param {function} fn
    */
-  async endpoint (event, fn) {
+  async endpoint(event, fn) {
     // Emit endpoint add
     await this.eden.call(`${this._prefix}.endpoint.add`, event, true);
 
@@ -81,7 +80,6 @@ class EventHelper extends Helper {
       this.eden.emit(emission.id, await fn(...emission.args), true);
     }, true);
   }
-
 }
 
 /**
