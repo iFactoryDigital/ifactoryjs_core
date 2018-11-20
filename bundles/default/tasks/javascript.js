@@ -3,6 +3,7 @@ const fs         = require('fs-extra');
 const os         = require('os');
 const glob       = require('glob-all');
 const gulp       = require('gulp');
+const path       = require('path');
 const buffer     = require('vinyl-buffer');
 const source     = require('vinyl-source-stream');
 const header     = require('gulp-header');
@@ -71,15 +72,15 @@ class JavascriptTask {
     const entries = glob.sync(sync);
 
     // Build vendor prepend
-    const js   = config.get('js');
+    const js = config.get('js');
     let head = '';
 
     // Loop javascript
     (js || []).forEach((file) => {
-      if (fs.existsSync(`${global.edenRoot}/${file}`)) {
-        head += fs.readFileSync(`${global.edenRoot}/${file}`, 'utf8') + os.EOL;
+      if (fs.existsSync(path.join(global.edenRoot, file))) {
+        head += fs.readFileSync(path.join(global.edenRoot, file), 'utf8') + os.EOL;
       } else {
-        head += fs.readFileSync(`${global.appRoot}/${file}`, 'utf8') + os.EOL;
+        head += fs.readFileSync(path.join(global.appRoot, 'bundles', file), 'utf8') + os.EOL;
       }
     });
 
