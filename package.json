@@ -1,6 +1,6 @@
 {
   "name": "@edenjs/core",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -51,7 +51,6 @@
     "gulp-sass": "^4.0.2",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-uglify-es": "^1.0.4",
-    "node-sass-tilde-importer": "^1.0.2",
     "os": "^0.1.1",
     "path": "^0.12.7",
     "through2": "^2.0.3",

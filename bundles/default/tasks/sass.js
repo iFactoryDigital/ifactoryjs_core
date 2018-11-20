@@ -2,15 +2,35 @@
 const fs         = require('fs-extra');
 const os         = require('os');
 const sass       = require('gulp-sass');
+const path       = require('path');
 const gulp       = require('gulp');
 const rename     = require('gulp-rename');
 const prefix     = require('gulp-autoprefixer');
 const through    = require('through2');
-const importer   = require('node-sass-tilde-importer');
 const sourcemaps = require('gulp-sourcemaps');
 
 // Require local dependencies
 const config = require('config');
+
+function customImporter(url) {
+  if (url[0] !== '~') {
+    return null;
+  }
+
+  const edenPath = path.resolve(global.edenRoot, 'node_modules', url.substr(1));
+
+  if (fs.existsSync(path.dirname(edenPath))) {
+    return { file : edenPath };
+  }
+
+  const appPath = path.resolve(global.appRoot, 'node_modules', url.substr(1));
+
+  if (fs.existsSync(path.dirname(appPath))) {
+    return { file : appPath };
+  }
+
+  return null;
+}
 
 /**
  * Create SASS Task class
@@ -42,14 +62,14 @@ class SASSTask {
    */
   run() {
     // Return new promise
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       // Run tmp
       this._tmp().then(() => {
         // Run gulp task
         gulp.src(`${global.appRoot}/data/cache/tmp.scss`)
           .pipe(sourcemaps.init())
           .pipe(sass({
-            importer,
+            importer    : customImporter,
             outputStyle : 'compressed',
           }))
           .pipe(prefix({
@@ -62,11 +82,8 @@ class SASSTask {
           .pipe(gulp.dest(`${global.appRoot}/data/www/public/css`))
           .on('end', resolve)
           .on('error', (err) => {
-            // Log error
-            console.error(err);
-
-            // Resolve
-            resolve();
+            // Reject promise
+            reject(err);
           });
       });
     });
@@ -92,8 +109,8 @@ class SASSTask {
     // Loop config sass files
     if (configSass) {
       for (let i = 0; i < configSass.length; i += 1) {
-        sassFiles.push(`${global.edenRoot}/${configSass[i]}`);
-        sassFiles.push(`${global.appRoot}/${configSass[i]}`);
+        sassFiles.push(path.join(global.edenRoot, configSass[i]));
+        sassFiles.push(path.join(global.appRoot, configSass[i]));
       }
     }
 
