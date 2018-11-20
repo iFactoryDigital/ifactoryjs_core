@@ -87,4 +87,4 @@ class EventHelper extends Helper {
  *
  * @type {EventHelper}
  */
-exports = module.exports = new EventHelper();
+module.exports = new EventHelper();

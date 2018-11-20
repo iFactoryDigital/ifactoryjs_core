@@ -14,9 +14,9 @@ class modelDaemon extends daemon {
   /**
    * Constructor
    */
-  constructor() {
+  constructor(...args) {
     // Run arguments
-    super(...arguments);
+    super(...args);
 
     // Bind build
     this.build = this.build.bind(this);
@@ -174,7 +174,7 @@ class modelDaemon extends daemon {
   /**
    * Removes all listeners
    */
-  async _collect() {
+  _collect() {
 
   }
 }
@@ -184,4 +184,4 @@ class modelDaemon extends daemon {
  *
  * @type {modelDaemon}
  */
-exports = module.exports = modelDaemon;
+module.exports = modelDaemon;

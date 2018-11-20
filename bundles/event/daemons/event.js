@@ -62,13 +62,13 @@ class EventDaemon extends Daemon {
     }
 
     // Increment endpoint
-    const endpoints = ++this._endpoints[event];
+    this._endpoints[event] += 1;
 
     // Unlock endpoints
     mutex();
 
     // Return endpoints
-    return endpoints;
+    return this._endpoints[event];
   }
 
   /**
@@ -108,4 +108,4 @@ class EventDaemon extends Daemon {
  *
  * @type {EventDaemon}
  */
-exports = module.exports = EventDaemon;
+module.exports = EventDaemon;

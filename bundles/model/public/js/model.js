@@ -79,6 +79,7 @@ class model extends events {
    */
   async build() {
     // Check if window
+    // eslint-disable-next-line global-require
     if (typeof window !== 'undefined') socket = require('socket/public/js/bootstrap');
 
     // Listen
@@ -98,7 +99,7 @@ class model extends events {
     await Promise.all(this.__queue);
 
     // Check loading
-    if (!socket || !this.__isListening) return;
+    if (!socket || !this.__isListening) return null;
 
     // Create new promise
     const promise = new Promise(async (resolve) => {
@@ -153,13 +154,13 @@ class model extends events {
     await this.building;
 
     // check id
-    if (!this.__id) return;
+    if (!this.__id) return null;
 
     // Check listening
     await Promise.all(this.__queue);
 
     // Check loading
-    if (!socket || this.__isListening) return;
+    if (!socket || this.__isListening) return null;
 
     // Set uuid
     if (!this.__uuid) this.__uuid = uuid();
@@ -197,7 +198,7 @@ class model extends events {
    */
   _update(object) {
     // Update details
-    for (const key in object) {
+    for (const key of Object.keys(object)) {
       // Check differences
       if (this.__data[key] !== object[key]) {
         // Listen to object key
@@ -229,4 +230,4 @@ class model extends events {
  *
  * @type {model}
  */
-exports = module.exports = model;
+module.exports = model;

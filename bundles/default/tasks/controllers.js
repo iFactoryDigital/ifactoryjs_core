@@ -59,12 +59,9 @@ class ControllersTask {
       }))
       .on('end', () => {
         // Loop types in config
-        for (const type in config) {
-          // Check config has type
-          if (config.hasOwnProperty(type)) {
-            // Write config file
-            this._runner.write(type, config[type]);
-          }
+        for (const type of Object.keys(config)) {
+          // Write config file
+          this._runner.write(type, config[type]);
         }
 
         // Write controller roots
@@ -94,4 +91,4 @@ class ControllersTask {
  *
  * @type {ControllersTask}
  */
-exports = module.exports = ControllersTask;
+module.exports = ControllersTask;

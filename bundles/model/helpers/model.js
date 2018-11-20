@@ -54,4 +54,4 @@ class ModelHelper extends helper {
  *
  * @type {ModelHelper}
  */
-exports = module.exports = new ModelHelper();
+module.exports = new ModelHelper();
