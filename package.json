@@ -1,6 +1,6 @@
 {
   "name": "@edenjs/core",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -26,7 +26,7 @@
     "@babel/runtime": "^7.1.2",
     "@edenjs/admin": "^1.0.10",
     "@edenjs/alert": "^1.0.1",
-    "@edenjs/asset": "^2.0.0",
+    "@edenjs/asset": "^2.0.2",
     "@edenjs/cache": "^1.0.0",
     "@edenjs/cms": "^1.0.10",
     "@edenjs/email": "^1.0.0",
