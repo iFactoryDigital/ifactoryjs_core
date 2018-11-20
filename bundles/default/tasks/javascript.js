@@ -1,4 +1,3 @@
-
 // Require dependencies
 const fs         = require('fs-extra');
 const os         = require('os');
@@ -7,10 +6,23 @@ const gulp       = require('gulp');
 const buffer     = require('vinyl-buffer');
 const source     = require('vinyl-source-stream');
 const header     = require('gulp-header');
+const babel      = require('@babel/core');
 const uglify     = require('gulp-uglify-es').default;
 const babelify   = require('babelify');
 const sourcemaps = require('gulp-sourcemaps');
 const browserify = require('browserify');
+
+// Globally require babel plugins (i wish eslint would thank me too)
+const babelPresets = {
+  presetEnv : require('@babel/preset-env'), // eslint-disable-line global-require
+};
+
+const babelPlugins = {
+  arrayIncludes    : require('babel-plugin-array-includes'), // eslint-disable-line global-require
+  transformClasses : require('@babel/plugin-transform-classes'), // eslint-disable-line global-require
+  transformAsync   : require('@babel/plugin-transform-async-to-generator'), // eslint-disable-line global-require
+  transformRuntime : require('@babel/plugin-transform-runtime'), // eslint-disable-line global-require
+};
 
 // Require local dependencies
 const config = require('config');
@@ -94,16 +106,23 @@ class JavascriptTask {
       ignoreGlobals : true,
     })
       .transform(babelify, {
-        presets : [['@babel/preset-env', {
-          targets : {
-            browsers : ['> 1%', 'last 2 versions', 'not ie <= 8'],
-          },
-          useBuiltIns : 'entry',
-        }]],
-        plugins : ['array-includes', '@babel/plugin-transform-classes', '@babel/plugin-transform-async-to-generator', ['@babel/transform-runtime', {
-          helpers     : false,
-          regenerator : true,
-        }]],
+        presets : [
+          babel.createConfigItem([babelPresets.presetEnv, {
+            useBuiltIns : 'entry',
+            targets     : {
+              browsers : ['> 1%', 'last 2 versions', 'not ie <= 8'],
+            },
+          }]),
+        ],
+        plugins : [
+          babel.createConfigItem(babelPlugins.arrayIncludes),
+          babel.createConfigItem(babelPlugins.transformClasses),
+          babel.createConfigItem(babelPlugins.transformAsync),
+          babel.createConfigItem([babelPlugins.transformRuntime, {
+            helpers      : false,
+            regenerators : true,
+          }]),
+        ],
       })
       .bundle()
       .pipe(source('app.min.js'))
