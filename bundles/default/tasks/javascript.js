@@ -98,9 +98,15 @@ class JavascriptTask {
         ...daemonRoots,
         ...controllerRoots,
 
+        // EdenJS modules
         `${global.edenRoot}/node_modules`,
+
+        // App modules
         `${global.appRoot}/node_modules`,
+        // App modules (legacy format)
         `${global.appRoot}/bundles/node_modules`,
+
+        // App bundles
         `${global.appRoot}/bundles`,
       ],
       debug         : true,

@@ -29,6 +29,12 @@ function customImporter(url) {
     return { file : appPath };
   }
 
+  const legacyAppPath = path.resolve(global.appRoot, 'bundles', 'node_modules', url.substr(1));
+
+  if (fs.existsSync(path.dirname(legacyAppPath))) {
+    return { file : legacyAppPath };
+  }
+
   return null;
 }
 
