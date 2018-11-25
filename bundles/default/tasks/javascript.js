@@ -99,6 +99,7 @@ class JavascriptTask {
         ...controllerRoots,
 
         `${global.edenRoot}/node_modules`,
+        `${global.appRoot}/node_modules`,
         `${global.appRoot}/bundles/node_modules`,
         `${global.appRoot}/bundles`,
       ],
