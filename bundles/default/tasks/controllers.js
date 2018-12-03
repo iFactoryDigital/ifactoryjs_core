@@ -49,7 +49,7 @@ class ControllersTask {
         bundles = bundles.join('/bundles');
 
         // Check roots includes
-        if (!roots.includes(bundles)) {
+        if (!roots.includes(`${bundles}/bundles`)) {
           // Push to roots
           roots.push(`${bundles}/bundles`);
         }

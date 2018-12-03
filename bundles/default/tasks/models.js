@@ -35,22 +35,19 @@ class ModelsTask {
       // Grab model files
       let Models = [];
 
+      // loop files
       for (let i = 0; i < files.length; i += 1) {
+        // concat sync
         Models = Models.concat(glob.sync(files[i]));
       }
 
       // Loop models
       const models = {};
 
+      // loop models
       for (const model of Models) {
-        const modelPath = path.relative(`${global.appRoot}/bundles`, model);
-
-        // Not relative to app, must be in eden
-        if (modelPath.split(path.sep)[0] === '..') {
-          models[path.basename(model).split('.')[0].toLowerCase()] = path.relative(global.edenRoot, model);
-        } else {
-          models[path.basename(model).split('.')[0].toLowerCase()] = modelPath;
-        }
+        // add to models
+        models[path.basename(model).split('.')[0].toLowerCase()] = model;
       }
 
       // Write models cache file
