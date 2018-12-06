@@ -79,8 +79,10 @@ class JavascriptTask {
     (js || []).forEach((file) => {
       if (fs.existsSync(path.join(global.edenRoot, file))) {
         head += fs.readFileSync(path.join(global.edenRoot, file), 'utf8') + os.EOL;
-      } else {
+      } else if (fs.existsSync(path.join(global.appRoot, 'bundles', file))) { // Legacy format
         head += fs.readFileSync(path.join(global.appRoot, 'bundles', file), 'utf8') + os.EOL;
+      } else {
+        head += fs.readFileSync(path.join(global.appRoot, file), 'utf8') + os.EOL;
       }
     });
 
