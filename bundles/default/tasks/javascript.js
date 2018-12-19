@@ -63,7 +63,7 @@ class JavascriptTask {
     // loop modules
     for (const mod of (config.get('modules') || [])) {
       // add module
-      sync.push(`${mod}/*/public/js/bootstrap.js`);
+      sync.push(`${mod}/bundles/*/public/js/bootstrap.js`);
       sync.push(`${mod}/node_modules/*/bundles/*/public/js/bootstrap.js`);
       sync.push(`${mod}/node_modules/*/*/bundles/*/public/js/bootstrap.js`);
     }
