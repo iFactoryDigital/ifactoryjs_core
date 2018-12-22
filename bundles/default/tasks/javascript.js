@@ -1,7 +1,7 @@
 // Require dependencies
 const fs         = require('fs-extra');
 const os         = require('os');
-const glob       = require('glob-all');
+const glob       = require('globby');
 const gulp       = require('gulp');
 const path       = require('path');
 const buffer     = require('vinyl-buffer');
