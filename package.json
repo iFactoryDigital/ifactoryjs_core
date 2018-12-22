@@ -36,7 +36,7 @@
     "@edenjs/meta": "^1.0.0",
     "@edenjs/riot": "^2.0.1",
     "@edenjs/router": "^1.0.2",
-    "@edenjs/serviceworker": "^2.0.1",
+    "@edenjs/serviceworker": "^2.0.3",
     "@edenjs/socket": "^1.0.2",
     "@edenjs/user": "^1.0.15",
     "babel-plugin-array-includes": "^2.0.3",
