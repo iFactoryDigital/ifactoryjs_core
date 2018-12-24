@@ -1,6 +1,7 @@
 // Require dependencies
-const gulp    = require('gulp');
-const through = require('through2');
+const gulp      = require('gulp');
+const through   = require('through2');
+const deepMerge = require('deepmerge');
 
 // Require local dependencies
 const parser = require('lib/utilities/parser');
@@ -33,13 +34,13 @@ class ControllersTask {
   run() {
     // Set config
     const roots  = [];
-    const config = {};
+    let config = {};
 
     // Get all routes
     return gulp.src(this._runner.files('controllers/**/*.js'))
       .pipe(through.obj((chunk, enc, cb) => {
         // Run pipe chunk
-        this._runner.merge(config, parser.controller(chunk));
+        config = deepMerge(config, parser.controller(chunk));
 
         // Get roots
         let bundles = chunk.path.replace(/\\/g, '/').split('/bundles');
