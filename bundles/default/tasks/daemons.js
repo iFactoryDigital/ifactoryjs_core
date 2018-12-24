@@ -1,6 +1,7 @@
 // Require dependencies
 const gulp    = require('gulp');
 const through = require('through2');
+const deepMerge = require('deepmerge');
 
 // Require local dependencies
 const parser = require('lib/utilities/parser');
@@ -35,13 +36,13 @@ class DaemonsTask {
   run(files) {
     // Set variables
     const roots = [];
-    const daemons = {};
+    let daemons = {};
 
     // Get all routes
     return gulp.src(files)
       .pipe(through.obj((chunk, enc, cb) => {
         // Run pipe chunk
-        this._runner.merge(daemons, parser.daemon(chunk));
+        daemons = deepMerge(daemons, parser.daemon(chunk));
 
         // Get roots
         let bundles = chunk.path.replace(/\\/g, '/').split('/bundles');

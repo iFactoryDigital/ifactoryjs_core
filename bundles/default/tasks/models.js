@@ -1,5 +1,5 @@
 // Require dependencies
-const glob = require('glob');
+const glob = require('globby');
 const path = require('path');
 
 /**

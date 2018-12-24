@@ -126,7 +126,7 @@ class SASSTask {
     // Run gulp
     return new Promise((resolve, reject) => {
       // Run gulp on sass files
-      gulp.src(sassFiles)
+      gulp.src(sassFiles, { allowEmpty : true })
         .pipe(through.obj(function thru(chunk, enc, cb) {
           // Run through callback
           let type = chunk.path.split('.');
