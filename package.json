@@ -41,6 +41,7 @@
     "@edenjs/user": "^1.0.15",
     "babel-plugin-array-includes": "^2.0.3",
     "babelify": "^10.0.0",
+    "bootstrap": "^4.2.1",
     "browserify": "^16.2.3",
     "deepmerge": "^3.0.0",
     "dot-prop-immutable": "^1.5.0",
@@ -53,12 +54,15 @@
     "gulp-sass": "^4.0.2",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-uglify-es": "^1.0.4",
+    "jquery": "^3.3.1",
     "os": "^0.1.1",
     "path": "^0.12.7",
+    "popper.js": "^1.14.6",
     "through2": "^3.0.0",
     "uuid": "^3.3.2",
     "vinyl-buffer": "^1.0.1",
-    "vinyl-source-stream": "^2.0.0"
+    "vinyl-source-stream": "^2.0.0",
+    "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {
     "@edenjs/eslint-config-eden": "^2.0.14",
