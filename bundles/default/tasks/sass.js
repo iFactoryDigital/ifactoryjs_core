@@ -1,13 +1,13 @@
 // Require dependencies
-const fs         = require('fs-extra');
-const os         = require('os');
-const sass       = require('gulp-sass');
-const path       = require('path');
-const gulp       = require('gulp');
-const rename     = require('gulp-rename');
-const prefix     = require('gulp-autoprefixer');
-const through    = require('through2');
-const sourcemaps = require('gulp-sourcemaps');
+const fs             = require('fs-extra');
+const os             = require('os');
+const path           = require('path');
+const gulp           = require('gulp');
+const gulpRename     = require('gulp-rename');
+const gulpSass       = require('gulp-sass');
+const gulpPrefix     = require('gulp-autoprefixer');
+const gulpSourcemaps = require('gulp-sourcemaps');
+const through        = require('through2');
 
 // Require local dependencies
 const config = require('config');
@@ -66,32 +66,43 @@ class SASSTask {
    *
    * @returns {Promise}
    */
-  run() {
-    // Return new promise
-    return new Promise((resolve, reject) => {
-      // Run tmp
-      this._tmp().then(() => {
-        // Run gulp task
-        gulp.src(`${global.appRoot}/data/cache/tmp.scss`)
-          .pipe(sourcemaps.init())
-          .pipe(sass({
-            importer    : customImporter,
-            outputStyle : 'compressed',
-          }))
-          .pipe(prefix({
-            browsers : [
-              'last 2 versions',
-            ],
-          }))
-          .pipe(rename('app.min.css'))
-          .pipe(sourcemaps.write(`${global.appRoot}/data/www/public/css`))
-          .pipe(gulp.dest(`${global.appRoot}/data/www/public/css`))
-          .on('end', resolve)
-          .on('error', (err) => {
-            // Reject promise
-            reject(err);
-          });
-      });
+  async run() {
+    await this._tmp();
+
+    // Run gulp task
+    let job = gulp.src(`${global.appRoot}/data/cache/tmp.scss`);
+
+    // Init gulpSourcemaps
+    if (config.get('environment') === 'dev' && !config.get('noSourcemaps')) {
+      job = job.pipe(gulpSourcemaps.init());
+    }
+
+    job = job.pipe(gulpSass({
+      importer    : customImporter,
+      outputStyle : 'compressed',
+    }));
+
+    job = job.pipe(gulpPrefix({
+      browsers : [
+        '>0.25%',
+        'not ie 11',
+        'not op_mini all',
+      ],
+    }));
+
+    job = job.pipe(gulpRename('app.min.css'));
+
+    // Write gulpSourcemaps
+    if (config.get('environment') === 'dev' && !config.get('noSourcemaps')) {
+      job = job.pipe(gulpSourcemaps.write('.'));
+    }
+
+    job = job.pipe(gulp.dest(`${global.appRoot}/data/www/public/css`));
+
+    // Wait for job to end
+    await new Promise((resolve, reject) => {
+      job.once('end', resolve);
+      job.once('error', reject);
     });
   }
 
@@ -102,12 +113,12 @@ class SASSTask {
    *
    * @private
    */
-  _tmp() {
+  async _tmp() {
     // Set variables
     let all = '';
 
     // Grab gulp source for sass. Create local variables array for sass files
-    let sassFiles = this._runner.files('public/scss/variables.scss');
+    const sassFiles = this._runner.files('public/scss/variables.scss');
 
     // Load sass
     const configSass = config.get('sass');
@@ -121,51 +132,53 @@ class SASSTask {
     }
 
     // Push local bootstrap files
-    sassFiles = sassFiles.concat(this._runner.files('public/scss/bootstrap.scss'));
+    sassFiles.push(...this._runner.files('public/scss/bootstrap.scss'));
 
-    // Run gulp
-    return new Promise((resolve, reject) => {
-      // Run gulp on sass files
-      gulp.src(sassFiles, { allowEmpty : true })
-        .pipe(through.obj(function thru(chunk, enc, cb) {
-          // Run through callback
-          let type = chunk.path.split('.');
+    // Create job
+    let job = gulp.src(sassFiles, { allowEmpty : true });
 
-          // Update type
-          type = type[type.length - 1];
+    // Run gulp on sass files
+    job = job.pipe(through.obj(async function thru(chunk, enc, cb) {
+      // Run through callback
+      let type = chunk.path.split('.');
 
-          // Check type
-          if (type === 'css') {
-            // Prepend
-            const prepend = fs.readFileSync(chunk.path, 'utf8');
+      // Update type
+      type = type[type.length - 1];
 
-            // Push to this
-            this.push({
-              all : prepend + os.EOL,
-            });
-          } else {
-            // Push to this
-            this.push({
-              all : `@import "${chunk.path}";${os.EOL}`,
-            });
-          }
+      // Check type
+      if (type === 'css') {
+        // Prepend
+        const prepend = await fs.readFile(chunk.path, 'utf8');
 
-          // Run callback
-          cb(null, chunk);
-        }))
-        .on('data', (data) => {
-          if (data.all) {
-            all += data.all;
-          }
-        })
-        .on('end', () => {
-          // Write temp sass file
-          fs.writeFileSync(`${global.appRoot}/data/cache/tmp.scss`, all);
+        // Push to this
+        this.push({
+          all : prepend + os.EOL,
+        });
+      } else {
+        // Push to this
+        this.push({
+          all : `@import "${chunk.path}";${os.EOL}`,
+        });
+      }
 
-          // Resolve
-          resolve();
-        })
-        .on('error', reject);
+      // Run callback
+      cb(null, chunk);
+    }));
+
+    // Wait for job to end
+    await new Promise((resolve, reject) => {
+      job.on('data', (data) => {
+        if (data.all) {
+          all += data.all;
+        }
+      });
+
+      job.once('end', async () => {
+        await fs.writeFile(`${global.appRoot}/data/cache/tmp.scss`, all);
+        resolve();
+      });
+
+      job.once('error', reject);
     });
   }
 

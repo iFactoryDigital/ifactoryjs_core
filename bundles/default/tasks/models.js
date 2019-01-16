@@ -1,5 +1,5 @@
 // Require dependencies
-const glob = require('globby');
+const glob = require('@edenjs/glob');
 const path = require('path');
 
 /**
@@ -26,39 +26,22 @@ class ModelsTask {
    * Run assets task
    *
    * @param   {array} files
-   *
-   * @returns {Promise}
    */
-  run(files) {
-    // Return promise
-    return new Promise((resolve) => {
-      // Grab model files
-      let Models = [];
+  async run(files) {
+    // Loop models
+    const models = {};
 
-      // loop files
-      for (let i = 0; i < files.length; i += 1) {
-        // concat sync
-        Models = Models.concat(glob.sync(files[i]));
-      }
+    // loop models
+    for (const model of await glob(files)) {
+      // add to models
+      models[path.basename(model).split('.')[0].toLowerCase()] = model;
+    }
 
-      // Loop models
-      const models = {};
+    // Write models cache file
+    await this._runner.write('models', models);
 
-      // loop models
-      for (const model of Models) {
-        // add to models
-        models[path.basename(model).split('.')[0].toLowerCase()] = model;
-      }
-
-      // Write models cache file
-      this._runner.write('models', models);
-
-      // Restart server
-      this._runner.restart();
-
-      // Resolve
-      resolve(true);
-    });
+    // Restart server
+    this._runner.restart();
   }
 
   /**

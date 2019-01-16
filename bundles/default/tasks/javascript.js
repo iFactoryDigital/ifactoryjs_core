@@ -1,17 +1,18 @@
 // Require dependencies
-const fs         = require('fs-extra');
-const os         = require('os');
-const glob       = require('globby');
-const gulp       = require('gulp');
-const path       = require('path');
-const buffer     = require('vinyl-buffer');
-const source     = require('vinyl-source-stream');
-const header     = require('gulp-header');
-const babel      = require('@babel/core');
-const uglify     = require('gulp-uglify-es').default;
-const babelify   = require('babelify');
-const sourcemaps = require('gulp-sourcemaps');
-const browserify = require('browserify');
+const fs             = require('fs-extra');
+const os             = require('os');
+const gulp           = require('gulp');
+const path           = require('path');
+const glob           = require('@edenjs/glob');
+const babel          = require('@babel/core');
+const browserify     = require('browserify');
+const watchify       = require('watchify');
+const babelify       = require('babelify');
+const gulpTerser     = require('gulp-terser');
+const gulpSourcemaps = require('gulp-sourcemaps');
+const gulpHeader     = require('gulp-header');
+const vinylSource    = require('vinyl-source-stream');
+const vinylBuffer    = require('vinyl-buffer');
 
 // Globally require babel plugins (i wish eslint would thank me too)
 const babelPresets = {
@@ -19,7 +20,7 @@ const babelPresets = {
 };
 
 const babelPlugins = {
-  arrayIncludes    : require('babel-plugin-array-includes'), // eslint-disable-line global-require
+  pollyfill        : require('@babel/polyfill'), // eslint-disable-line global-require
   transformClasses : require('@babel/plugin-transform-classes'), // eslint-disable-line global-require
   transformAsync   : require('@babel/plugin-transform-async-to-generator'), // eslint-disable-line global-require
   transformRuntime : require('@babel/plugin-transform-runtime'), // eslint-disable-line global-require
@@ -42,49 +43,17 @@ class JavascriptTask {
   constructor(runner) {
     // Set private variables
     this._runner = runner;
+    this._b = null;
 
     // Bind public methods
     this.run = this.run.bind(this);
     this.watch = this.watch.bind(this);
   }
 
-  /**
-   * Run javascript task
-   *
-   * @return {Promise}
-   */
-  run() {
-    // create sync
-    const sync = [
-      `${global.edenRoot}/node_modules/*/bundles/*/public/js/bootstrap.js`,
-      `${global.edenRoot}/node_modules/*/*/bundles/*/public/js/bootstrap.js`,
-    ];
-
-    // loop modules
-    for (const mod of (config.get('modules') || [])) {
-      // add module
-      sync.push(`${mod}/bundles/*/public/js/bootstrap.js`);
-      sync.push(`${mod}/node_modules/*/bundles/*/public/js/bootstrap.js`);
-      sync.push(`${mod}/node_modules/*/*/bundles/*/public/js/bootstrap.js`);
+  async _browserify(files) {
+    if (this._b !== null) {
+      return this._b;
     }
-
-    // Create javascript array
-    const entries = glob.sync(sync);
-
-    // Build vendor prepend
-    const js = config.get('js');
-    let head = '';
-
-    // Loop javascript
-    (js || []).forEach((file) => {
-      if (fs.existsSync(path.join(global.edenRoot, file))) {
-        head += fs.readFileSync(path.join(global.edenRoot, file), 'utf8') + os.EOL;
-      } else if (fs.existsSync(path.join(global.appRoot, 'bundles', file))) { // Legacy format
-        head += fs.readFileSync(path.join(global.appRoot, 'bundles', file), 'utf8') + os.EOL;
-      } else {
-        head += fs.readFileSync(path.join(global.appRoot, file), 'utf8') + os.EOL;
-      }
-    });
 
     // Setup paths
     const moduleRoots = (config.get('modules') || []).map(mod => `${mod}/node_modules`);
@@ -92,7 +61,7 @@ class JavascriptTask {
     const controllerRoots = fs.existsSync(`${global.appRoot}/data/cache/controller.roots.json`) ? require(`${global.appRoot}/data/cache/controller.roots.json`) : []; // eslint-disable-line global-require, import/no-dynamic-require
 
     // Browserify javascript
-    let job = browserify({
+    let b = browserify({
       paths : [
         `${global.appRoot}/data`,
 
@@ -111,41 +80,86 @@ class JavascriptTask {
         // App bundles
         `${global.appRoot}/bundles`,
       ],
-      debug         : true,
-      entries,
-      ignoreGlobals : true,
-    })
-      .transform(babelify, {
-        presets : [
-          babel.createConfigItem([babelPresets.presetEnv, {
-            useBuiltIns : 'entry',
-            targets     : {
-              browsers : ['> 1%', 'last 2 versions', 'not ie <= 8'],
-            },
-          }]),
-        ],
-        plugins : [
-          babel.createConfigItem(babelPlugins.arrayIncludes),
-          babel.createConfigItem(babelPlugins.transformClasses),
-          babel.createConfigItem(babelPlugins.transformAsync),
-          babel.createConfigItem([babelPlugins.transformRuntime, {
-            helpers      : false,
-            regenerators : true,
-          }]),
-        ],
-      })
+      debug         : config.get('environment') === 'dev' && !config.get('noSourcemaps'),
+      entries       : await glob(files),
+      commondir     : false,
+      insertGlobals : true,
+    });
+
+    b = b.transform(babelify, {
+      sourceMaps : config.get('environment') === 'dev' && !config.get('noSourcemaps'),
+      presets    : [
+        babel.createConfigItem([babelPresets.presetEnv, {
+          useBuiltIns : 'entry',
+          targets     : {
+            browsers : [
+              '>0.25%',
+              'not ie 11',
+              'not op_mini all',
+            ],
+          },
+        }]),
+      ],
+      plugins : [
+        babel.createConfigItem(babelPlugins.pollyfill),
+        babel.createConfigItem(babelPlugins.transformClasses),
+        babel.createConfigItem(babelPlugins.transformAsync),
+        babel.createConfigItem([babelPlugins.transformRuntime, {
+          helpers      : false,
+          regenerators : true,
+        }]),
+      ],
+    });
+
+    b = watchify(b);
+
+    this._b = b;
+
+    return b;
+  }
+
+  /**
+   * Run javascript task
+   *
+   * @return {Promise}
+   */
+  async run(files) {
+    const b = await this._browserify(files);
+
+    // Create job from browserify
+    let job = b
       .bundle()
-      .pipe(source('app.min.js'))
-      .pipe(buffer())
-      .pipe(sourcemaps.init({
-        loadMaps : true,
-      }))
-      .pipe(header(head));
+      .pipe(vinylSource('app.min.js')) // Convert to gulp stream
+      .pipe(vinylBuffer()); // Needed for terser, sourcemaps
+
+    // Init gulpSourcemaps
+    if (config.get('environment') === 'dev' && !config.get('noSourcemaps')) {
+      job = job.pipe(gulpSourcemaps.init({ loadMaps : true }));
+    }
+
+    // Build vendor prepend
+    let head = '';
+    const js = config.get('js');
+
+    for (const file of (js || [])) {
+      if (await fs.pathExists(path.join(global.edenRoot, file))) {
+        head += (await fs.readFile(path.join(global.edenRoot, file), 'utf8')) + os.EOL;
+      } else if (await fs.pathExists(path.join(global.appRoot, 'bundles', file))) { // Legacy format
+        head += (await fs.readFile(path.join(global.appRoot, 'bundles', file), 'utf8')) + os.EOL;
+      } else if (await fs.pathExists(path.join(global.appRoot, file))) {
+        head += (await fs.readFile(path.join(global.appRoot, file), 'utf8')) + os.EOL;
+      } else {
+        throw new Error(`JS file missing: ${file}`);
+      }
+    }
+
+    // Apply head to file
+    job = job.pipe(gulpHeader(head, false));
 
     // Only minify in live
-    if (['live', 'production'].includes(config.get('environment'))) {
+    if (config.get('environment') === 'live') {
       // Pipe uglify
-      job = job.pipe(uglify({
+      job = job.pipe(gulpTerser({
         ie8    : false,
         mangle : true,
         output : {
@@ -155,16 +169,24 @@ class JavascriptTask {
       }));
     }
 
-    // Pipe job
-    job = job.pipe(sourcemaps.write(`${global.appRoot}/data/www/public/js`))
-      .pipe(gulp.dest(`${global.appRoot}/data/www/public/js`))
-      .on('end', () => {
-        // Restart server
-        this._runner.restart();
-      });
+    // Write gulpSourcemaps
+    if (config.get('environment') === 'dev' && !config.get('noSourcemaps')) {
+      job = job.pipe(gulpSourcemaps.write('.'));
+    }
 
-    // Return job
-    return job;
+    // Pipe job
+    job = job.pipe(gulp.dest(`${global.appRoot}/data/www/public/js`));
+
+    // Restart server on end
+    job.on('end', () => {
+      this._runner.restart();
+    });
+
+    // Wait for job to end
+    await new Promise((resolve, reject) => {
+      job.once('end', resolve);
+      job.once('error', reject);
+    });
   }
 
   /**
@@ -175,7 +197,7 @@ class JavascriptTask {
   watch() {
     // Return files
     return [
-      'public/js/**/*.js',
+      'public/js/bootstrap.js',
     ];
   }
 }
