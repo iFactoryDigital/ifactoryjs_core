@@ -1,6 +1,6 @@
 {
   "name": "@edenjs/core",
-  "version": "2.0.21",
+  "version": "2.0.22",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -32,10 +32,10 @@
     "@edenjs/email": "^1.0.0",
     "@edenjs/glob": "^1.0.0",
     "@edenjs/grid": "^1.0.10",
-    "@edenjs/locale": "^2.0.5",
+    "@edenjs/locale": "^2.0.6",
     "@edenjs/menu": "^1.0.11",
     "@edenjs/meta": "^1.0.0",
-    "@edenjs/riot": "^2.0.5",
+    "@edenjs/riot": "^2.0.6",
     "@edenjs/router": "^1.0.2",
     "@edenjs/serviceworker": "^2.0.4",
     "@edenjs/socket": "^1.0.3",
