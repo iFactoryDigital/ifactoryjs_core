@@ -4,7 +4,7 @@ require('@babel/polyfill');
 
 // Require class dependencies
 const events  = require('events');
-const dotProp = require('dot-prop');
+const dotProp = require('dot-prop-immutable');
 
 /**
  * Create Eden Store class
