@@ -1,7 +1,7 @@
 // Require dependencies
 const uuid    = require('uuid');
 const events  = require('events');
-const dotProp = require('dot-prop-immutable');
+const dotProp = require('dot-prop');
 
 // global vars
 let socket = null;

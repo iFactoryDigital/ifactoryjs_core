@@ -15,7 +15,7 @@ class EventDaemon extends Daemon {
     super();
 
     // Set private variables
-    this._prefix = 'eden.events.Daemon';
+    this._prefix = 'eden.events.daemon';
     this._endpoints = {};
 
     // Bind private methods
