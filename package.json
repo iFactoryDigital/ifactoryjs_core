@@ -1,6 +1,6 @@
 {
   "name": "@edenjs/core",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -35,7 +35,7 @@
     "@edenjs/socket": "^1.0.3",
     "@edenjs/user": "^1.0.15",
     "bootstrap": "^4.2.1",
-    "dot-prop-immutable": "^1.5.0",
+    "dot-prop": "^4.2.0",
     "jquery": "^3.3.1",
     "popper.js": "^1.14.6",
     "uuid": "^3.3.2",
