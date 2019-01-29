@@ -1,7 +1,4 @@
 
-// Require polyfill
-require('@babel/polyfill');
-
 // Require class dependencies
 const events  = require('events');
 const dotProp = require('dot-prop-immutable');

@@ -1,6 +1,6 @@
 {
   "name": "@edenjs/core",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -18,11 +18,11 @@
   "homepage": "https://github.com/eden-js/core#readme",
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
-    "@edenjs/admin": "^1.1.2",
+    "@edenjs/admin": "^1.2.2",
     "@edenjs/alert": "^1.0.2",
     "@edenjs/asset": "^2.0.4",
     "@edenjs/cache": "^1.0.0",
-    "@edenjs/cms": "^1.1.28",
+    "@edenjs/cms": "^1.1.30",
     "@edenjs/email": "^1.0.0",
     "@edenjs/glob": "^1.0.0",
     "@edenjs/grid": "^1.0.10",
@@ -30,8 +30,8 @@
     "@edenjs/menu": "^1.0.11",
     "@edenjs/meta": "^1.0.0",
     "@edenjs/riot": "^2.0.6",
-    "@edenjs/router": "^1.0.2",
-    "@edenjs/serviceworker": "^2.0.5",
+    "@edenjs/router": "^1.0.3",
+    "@edenjs/serviceworker": "^2.0.6",
     "@edenjs/socket": "^1.0.3",
     "@edenjs/user": "^1.0.15",
     "bootstrap": "^4.2.1",
@@ -45,8 +45,8 @@
     "@edenjs/eslint-config-eden": "^2.0.14",
     "eslint": "^5.12.1",
     "eslint-config-airbnb": "^17.1.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jsx-a11y": "^6.1.2",
+    "eslint-plugin-import": "^2.15.0",
+    "eslint-plugin-jsx-a11y": "^6.2.0",
     "eslint-plugin-react": "^7.12.4"
   }
 }
