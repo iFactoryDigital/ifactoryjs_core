@@ -31,6 +31,7 @@ class EdenModel extends Events {
     this.set = this.set.bind(this);
     this.build = this.build.bind(this);
     this.listen = this.listen.bind(this);
+    this.setOpts = this.setOpts.bind(this);
     this.refresh = this.refresh.bind(this);
     this.destroy = this.destroy.bind(this);
 
@@ -68,8 +69,30 @@ class EdenModel extends Events {
     // Return this key
     this.__data = dotProp.set(this.__data, key, value);
 
+    // emit key
+    this.emit(key);
+
+    // emit base key
+    if (key !== key.split('.')[0]) this.emit(key.split('.')[0]);
+
     // return get key
     return this.get(key);
+  }
+
+  /**
+   * sets opts
+   *
+   * @param {Object} opts
+   */
+  setOpts(opts) {
+    // loop keys
+    for (let key in opts) {
+      // check value matches
+      if (this.__data[key] !== opts[key]) {
+        // set value
+        this.set(key, opts[key]);
+      }
+    }
   }
 
   /**
