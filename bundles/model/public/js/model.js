@@ -1,30 +1,28 @@
 // Require dependencies
 const uuid    = require('uuid');
-const events  = require('events');
+const Events  = require('events');
 const dotProp = require('dot-prop');
-
-// global vars
-let socket = null;
 
 /**
  * Create live model class
  *
  * @extends events
  */
-class model extends events {
+class EdenModel extends Events {
   /**
    * Construct model class
    *
    * @param {String} type
+   * @param {String} id
    * @param {Object} object
    */
-  constructor(type, object) {
+  constructor(type, id, opts) {
     // Run super
     super();
 
     // Set id
-    this.__id = object.id;
-    this.__data = object;
+    this.__id = id;
+    this.__data = opts;
     this.__type = type;
     this.__queue = [];
 
@@ -41,7 +39,7 @@ class model extends events {
     this._connect = this._connect.bind(this);
 
     // Build
-    this.building = this.build();
+    if (typeof eden !== 'undefined') this.building = this.build();
   }
 
   /**
@@ -78,10 +76,6 @@ class model extends events {
    * Builds this
    */
   async build() {
-    // Check if window
-    // eslint-disable-next-line global-require
-    if (typeof window !== 'undefined') socket = require('socket/public/js/bootstrap');
-
     // Listen
     await this.listen();
   }
@@ -99,22 +93,22 @@ class model extends events {
     await Promise.all(this.__queue);
 
     // Check loading
-    if (!socket || !this.__isListening) return null;
+    if (!this.__isListening) return null;
 
     // Create new promise
     const promise = new Promise(async (resolve) => {
       // Call eden
-      await socket.call(`model.deafen.${this.__type}`, this.__id, this.__uuid);
+      await eden.socket.call(`model.deafen.${this.__type}`, this.__id, this.__uuid);
 
       // Set listen
       this.__isListening = false;
 
       // Add on event
-      socket.off(`model.update.${this.__type}.${this.__id}`, this._update);
+      eden.socket.off(`model.update.${this.__type}.${this.__id}`, this._update);
 
       // Listen to connect again
-      socket.off('connect', this._connect);
-      socket.off('connected', this._connect);
+      eden.socket.off('connect', this._connect);
+      eden.socket.off('connected', this._connect);
 
       // Resolve
       resolve();
@@ -134,11 +128,8 @@ class model extends events {
     // Await building
     await this.building;
 
-    // Check loading
-    if (!socket) return;
-
     // Call eden
-    const object = await socket.call(`model.refresh.${this.__type}`, this.__id);
+    const object = await eden.socket.call(`model.refresh.${this.__type}`, this.__id);
 
     // Run update
     this._update(object);
@@ -160,7 +151,7 @@ class model extends events {
     await Promise.all(this.__queue);
 
     // Check loading
-    if (!socket || this.__isListening) return null;
+    if (this.__isListening) return null;
 
     // Set uuid
     if (!this.__uuid) this.__uuid = uuid();
@@ -168,17 +159,17 @@ class model extends events {
     // Create new promise
     const promise = new Promise(async (resolve) => {
       // Call eden
-      await socket.call(`model.listen.${this.__type}`, this.__id, this.__uuid);
+      await eden.socket.call(`model.listen.${this.__type}`, this.__id, this.__uuid);
 
       // Set listen
       this.__isListening = true;
 
       // Add on event
-      socket.on(`model.update.${this.__type}.${this.__id}`, this._update);
+      eden.socket.on(`model.update.${this.__type}.${this.__id}`, this._update);
 
       // Listen to connect again
-      socket.on('connect', this._connect);
-      socket.on('connected', this._connect);
+      eden.socket.on('connect', this._connect);
+      eden.socket.on('connected', this._connect);
 
       // Resolve
       resolve();
@@ -220,7 +211,7 @@ class model extends events {
     // Reconnected
     if (this.__isListening) {
       // Call live listen again
-      socket.call(`model.listen.${this.__type}`, this.__id, this.__uuid);
+      eden.socket.call(`model.listen.${this.__type}`, this.__id, this.__uuid);
     }
   }
 }
@@ -228,6 +219,6 @@ class model extends events {
 /**
  * Export live model class
  *
- * @type {model}
+ * @type {EdenModel}
  */
-module.exports = model;
+module.exports = EdenModel;

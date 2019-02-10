@@ -1,187 +1,247 @@
-// Require daemon
-const daemon = require('daemon');
-
-// Require helpers
-const socket = helper('socket');
+// Require dependencies
+const uuid    = require('uuid');
+const Events  = require('events');
+const dotProp = require('dot-prop');
 
 /**
- * Create live daemon
+ * Create live model class
  *
- * @compute 0
- * @extends daemon
+ * @extends events
  */
-class modelDaemon extends daemon {
+class EdenModel extends Events {
   /**
-   * Constructor
+   * Construct model class
+   *
+   * @param {String} type
+   * @param {String} id
+   * @param {Object} object
    */
-  constructor(...args) {
-    // Run arguments
-    super(...args);
+  constructor(type, id, opts) {
+    // Run super
+    super();
 
-    // Bind build
+    // Set id
+    this.__id = id;
+    this.__data = opts;
+    this.__type = type;
+    this.__queue = [];
+
+    // Bind methods
+    this.get = this.get.bind(this);
+    this.set = this.set.bind(this);
     this.build = this.build.bind(this);
-    this.models = new Map();
+    this.listen = this.listen.bind(this);
+    this.setOpts = this.setOpts.bind(this);
+    this.refresh = this.refresh.bind(this);
+    this.destroy = this.destroy.bind(this);
 
     // Bind private methods
-    this._save = this._save.bind(this);
-    this._deafen = this._deafen.bind(this);
-    this._listen = this._listen.bind(this);
-    this._collect = this._collect.bind(this);
+    this._update = this._update.bind(this);
+    this._connect = this._connect.bind(this);
 
-    // Bind building
-    this.building = this.build();
+    // Build
+    if (typeof eden !== 'undefined') this.building = this.build();
   }
 
   /**
-   * Build live daemon
-   */
-  build() {
-    // Add endpoint for listen
-    this.eden.endpoint('model.listen', this._listen, true);
-    this.eden.endpoint('model.deafen', this._deafen, true);
-
-    // Add listeners for events
-    this.eden.on('model.save', this._save, true);
-
-    // Set interval for garbage collection
-    setInterval(this._collect, 30 * 1000);
-  }
-
-  /**
-   * On model save
-   * @param  {Object}  opts
-   */
-  async _save(opts) {
-    // Check models has
-    if (!this.models.has(opts.model)) return;
-
-    // Get cache
-    const listeners = await this.eden.get(`model.listen.${opts.model.toLowerCase()}.${opts.id}`) || [];
-
-    // Check length
-    if (!listeners.length) return;
-
-    // Log to eden
-    this.logger.log('debug', `Sending live response on ${opts.model.toLowerCase()} #${opts.id}`, {
-      class : this.constructor.name,
-    });
-
-    // Get model
-    let Model = model(opts.model);
-
-    // Load by id
-    Model = await Model.findById(opts.id);
-
-    // Emit sanitised
-    const sent      = [];
-    const sanitised = await Model.sanitise();
-
-    // Loop listeners
-    listeners.forEach((listener) => {
-      // Emit to socket
-      if (!sent.includes(listener.session)) socket.session(listener.session, `model.update.${opts.model.toLowerCase()}.${opts.id}`, sanitised);
-
-      // Push to sent
-      sent.push(listener.session);
-    });
-  }
-
-  /**
-   * Listen to endpoint for live data
+   * Returns data key
    *
-   * @param  {String}  sessionID
-   * @param  {String}  type
-   * @param  {String}  id
-   * @param  {String}  listenID
+   * @param  {String} key
+   *
+   * @return {*}
    */
-  async _deafen(sessionID, type, id, listenID) {
-    // Set model
-    if (!this.models.has(type)) this.models.set(type, true);
+  get(key) {
+    // Check key
+    if (!key || !key.length) return this.__data;
 
-    // Log to eden
-    this.logger.log('debug', `removing model listener on ${type} #${id} for ${sessionID}`, {
-      class : 'modelDaemon',
-    });
-
-    // Lock listen
-    const unlock = await this.eden.lock(`model.listen.${type}.${id}`);
-
-    // Set cache
-    let listeners = await this.eden.get(`model.listen.${type}.${id}`) || [];
-
-    // Add sessionID to listeners
-    listeners = listeners.filter((listener) => {
-      // Return filtered
-      return listener.uuid !== listenID;
-    });
-
-    // Set to eden again
-    await this.eden.set(`model.listen.${type}.${id}`, listeners, 60 * 60 * 1000);
-
-    // Unlock live listen set
-    unlock();
+    // Return this key
+    return dotProp.get(this.__data, key);
   }
 
   /**
-   * Listen to endpoint for live data
+   * Returns data key
    *
-   * @param  {String}  sessionID
-   * @param  {String}  type
-   * @param  {String}  id
-   * @param  {String}  listenID
+   * @param  {String} key
+   *
+   * @return {*}
    */
-  async _listen(sessionID, type, id, listenID) {
-    // Set model
-    if (!this.models.has(type)) this.models.set(type, true);
+  set(key, value) {
+    // Return this key
+    this.__data = dotProp.set(this.__data, key, value);
 
-    // Log to eden
-    this.logger.log('debug', `adding model listener on ${type} #${id} for ${sessionID}`, {
-      class : 'modelDaemon',
+    // emit key
+    this.emit(key);
+
+    // emit base key
+    if (key !== key.split('.')[0]) this.emit(key.split('.')[0]);
+
+    // return get key
+    return this.get(key);
+  }
+
+  /**
+   * sets opts
+   *
+   * @param {Object} opts
+   */
+  setOpts(opts) {
+    // loop keys
+    for (let key in opts) {
+      // check value matches
+      if (this.__data[key] !== opts[key]) {
+        // set value
+        this.set(key, opts[key]);
+      }
+    }
+  }
+
+  /**
+   * Builds this
+   */
+  async build() {
+    // Listen
+    await this.listen();
+  }
+
+  /**
+   * Listens to model by id
+   *
+   * @return {Promise}
+   */
+  async destroy() {
+    // Await building
+    await this.building;
+
+    // Check listening
+    await Promise.all(this.__queue);
+
+    // Check loading
+    if (!this.__isListening) return null;
+
+    // Create new promise
+    const promise = new Promise(async (resolve) => {
+      // Call eden
+      await eden.socket.call(`model.deafen.${this.__type}`, this.__id, this.__uuid);
+
+      // Set listen
+      this.__isListening = false;
+
+      // Add on event
+      eden.socket.off(`model.update.${this.__type}.${this.__id}`, this._update);
+
+      // Listen to connect again
+      eden.socket.off('connect', this._connect);
+      eden.socket.off('connected', this._connect);
+
+      // Resolve
+      resolve();
     });
 
-    // Lock listen
-    const unlock = await this.eden.lock(`model.listen.${type}.${id}`);
+    // Add to queue
+    this.__queue.push(promise);
 
-    // Set cache
-    const listeners = await this.eden.get(`model.listen.${type}.${id}`) || [];
+    // Return await deafening
+    return await promise;
+  }
 
-    // Check found
-    const found = listeners.find((listener) => {
-      // Return filtered
-      return listener.session === sessionID && listener.uuid === listenID;
+  /**
+   * Refreshes this
+   */
+  async refresh() {
+    // Await building
+    await this.building;
+
+    // Call eden
+    const object = await eden.socket.call(`model.refresh.${this.__type}`, this.__id);
+
+    // Run update
+    this._update(object);
+  }
+
+  /**
+   * Listens to model by id
+   *
+   * @return {Promise}
+   */
+  async listen() {
+    // Await building
+    await this.building;
+
+    // check id
+    if (!this.__id) return null;
+
+    // Check listening
+    await Promise.all(this.__queue);
+
+    // Check loading
+    if (this.__isListening) return null;
+
+    // Set uuid
+    if (!this.__uuid) this.__uuid = uuid();
+
+    // Create new promise
+    const promise = new Promise(async (resolve) => {
+      // Call eden
+      await eden.socket.call(`model.listen.${this.__type}`, this.__id, this.__uuid);
+
+      // Set listen
+      this.__isListening = true;
+
+      // Add on event
+      eden.socket.on(`model.update.${this.__type}.${this.__id}`, this._update);
+
+      // Listen to connect again
+      eden.socket.on('connect', this._connect);
+      eden.socket.on('connected', this._connect);
+
+      // Resolve
+      resolve();
     });
 
-    // Add sessionID to listeners
-    if (found) {
-      // Update date
-      found.last = new Date();
-    } else {
-      // Push listener
-      listeners.push({
-        uuid    : listenID,
-        last    : new Date(),
-        session : sessionID,
-      });
+    // Add to queue
+    this.__queue.push(promise);
+
+    // Return listening promise
+    return await promise;
+  }
+
+  /**
+   * On update
+   *
+   * @param  {Object} object
+   */
+  _update(object) {
+    // Update details
+    for (const key of Object.keys(object)) {
+      // Check differences
+      if (this.__data[key] !== object[key]) {
+        // Listen to object key
+        this.__data[key] = object[key];
+
+        // Emit event
+        this.emit(key, object[key]);
+      }
     }
 
-    // Set to eden again
-    await this.eden.set(`model.listen.${type}.${id}`, listeners, 60 * 60 * 1000);
-
-    // Unlock live listen set
-    unlock();
+    // Emit update
+    this.emit('update');
   }
 
   /**
-   * Removes all listeners
+   * On socket reconnect
    */
-  _collect() {
-
+  _connect() {
+    // Reconnected
+    if (this.__isListening) {
+      // Call live listen again
+      eden.socket.call(`model.listen.${this.__type}`, this.__id, this.__uuid);
+    }
   }
 }
 
 /**
- * Build live daemon class
+ * Export live model class
  *
- * @type {modelDaemon}
+ * @type {EdenModel}
  */
-module.exports = modelDaemon;
+module.exports = EdenModel;

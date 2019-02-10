@@ -1,6 +1,6 @@
 
 // Require live model
-const FEModel = require('model/public/js/model');
+const EdenModel = require('model/public/js/model');
 
 // Create mixin
 riot.mixin('model', {
@@ -8,21 +8,7 @@ riot.mixin('model', {
    * On init function
    */
   init() {
-    // Set live models
-    this.__model = [];
 
-    // Let kill
-    const killAll = () => {
-      // Kill all models
-      this.__model.forEach((model) => {
-        // Destroy
-        model.destroy();
-      });
-    };
-
-    // On unmount
-    this.on('deafen', killAll);
-    this.on('unmount', killAll);
   },
 
   /**
@@ -35,15 +21,21 @@ riot.mixin('model', {
    */
   model(type, object) {
     // Create model
-    const Model = new FEModel(type, object);
+    if (!this.eden.frontend) {
+      // create model
+      const model = new EdenModel(type, object.id, object);
 
-    // Push new live model
-    this.__model.push(Model);
+      // Return model
+      return model;
+    }
+
+    // return model
+    const model = window.eden.model.get(type, object.id, object);
 
     // On update
-    Model.on('update', this.update);
+    model.on('update', this.update);
 
     // Return model
-    return Model;
+    return model;
   },
 });
