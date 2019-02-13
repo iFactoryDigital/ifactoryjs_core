@@ -67,7 +67,7 @@ class EdenModel extends Events {
    */
   set(key, value) {
     // Return this key
-    this.__data = dotProp.set(this.__data, key, value);
+    dotProp.set(this.__data, key, value);
 
     // emit key
     this.emit(key);
