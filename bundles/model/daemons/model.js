@@ -67,19 +67,29 @@ class ModelDaemon extends daemon {
     });
 
     // Get model
-    let Model = model(opts.model);
+    const Model = model(opts.model);
 
     // Load by id
-    Model = await Model.findById(opts.id);
+    const foundModel = await Model.findById(opts.id);
 
     // Emit sanitised
     const sent      = [];
-    const sanitised = await Model.sanitise();
+    const atomic    = {};
+    const sanitised = await foundModel.sanitise();
+
+    // emit only updates
+    Object.keys(sanitised).forEach((key) => {
+      // remove key if not in updated
+      if (opts.updates.includes(key)) atomic[key] = sanitised[key];
+    });
 
     // Loop listeners
     listeners.forEach((listener) => {
-      // Emit to socket
-      if (!sent.includes(listener.session)) socket.session(listener.session, `model.update.${opts.model.toLowerCase()}.${opts.id}`, sanitised);
+      // check atomic
+      if (sent.includes(listener.session)) return;
+
+      // send atomic update
+      socket.session(listener.session, `model.update.${opts.model.toLowerCase()}.${opts.id}`, listener.atomic ? atomic : sanitised);
 
       // Push to sent
       sent.push(listener.session);
@@ -129,8 +139,9 @@ class ModelDaemon extends daemon {
    * @param  {String}  type
    * @param  {String}  id
    * @param  {String}  listenID
+   * @param  {Boolean} atomic
    */
-  async _listen(sessionID, type, id, listenID) {
+  async _listen(sessionID, type, id, listenID, atomic = false) {
     // Set model
     if (!this.models.has(type)) this.models.set(type, true);
 
@@ -160,6 +171,7 @@ class ModelDaemon extends daemon {
       listeners.push({
         uuid    : listenID,
         last    : new Date(),
+        atomic  : atomic,
         session : sessionID,
       });
     }
