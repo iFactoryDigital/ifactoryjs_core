@@ -182,7 +182,7 @@ class EdenModel extends Events {
     // Create new promise
     const promise = new Promise(async (resolve) => {
       // Call eden
-      await eden.socket.call(`model.listen.${this.__type}`, this.__id, this.__uuid);
+      eden.socket.call(`model.listen.${this.__type}`, this.__id, this.__uuid);
 
       // Set listen
       this.__isListening = true;
@@ -214,7 +214,7 @@ class EdenModel extends Events {
     // Update details
     for (const key of Object.keys(object)) {
       // Check differences
-      if (this.__data[key] !== object[key]) {
+      if (JSON.stringify(this.__data[key]) !== JSON.stringify(object[key])) {
         // Listen to object key
         this.__data[key] = object[key];
 
