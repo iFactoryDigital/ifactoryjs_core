@@ -1,5 +1,5 @@
 // Require daemon
-const daemon = require('daemon');
+const Daemon = require('daemon');
 
 // Require helpers
 const socket = helper('socket');
@@ -10,7 +10,7 @@ const socket = helper('socket');
  * @compute 0
  * @extends daemon
  */
-class ModelDaemon extends daemon {
+class ModelDaemon extends Daemon {
   /**
    * Constructor
    */
@@ -169,9 +169,9 @@ class ModelDaemon extends daemon {
     } else {
       // Push listener
       listeners.push({
+        atomic,
         uuid    : listenID,
         last    : new Date(),
-        atomic  : atomic,
         session : sessionID,
       });
     }
