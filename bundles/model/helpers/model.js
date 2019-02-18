@@ -31,7 +31,7 @@ class ModelHelper extends helper {
    */
   deafen(sessionID, Model, listenID) {
     // Call local
-    return this.eden.thread('compute', 0).call('model.deafen', sessionID, Model.constructor.name.toLowerCase(), Model.get('_id').toString(), listenID, atomic);
+    return this.eden.thread('compute', 0).call('model.deafen', sessionID, Model.constructor.name.toLowerCase(), Model.get('_id').toString(), listenID);
   }
 
   /**
