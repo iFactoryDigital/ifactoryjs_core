@@ -55,6 +55,15 @@ class ModelDaemon extends Daemon {
     // Check models has
     if (!this.models.has(opts.model)) return;
 
+    // check updates
+    opts.updates = opts.updates.filter((key) => {
+      // check key
+      return !['created_at', 'updated_at'].includes(key);
+    });
+
+    // don't emit if not required
+    if (!opts.updates.length) return;
+
     // Get cache
     const listeners = await this.eden.get(`model.listen.${opts.model.toLowerCase()}.${opts.id}`) || [];
 
