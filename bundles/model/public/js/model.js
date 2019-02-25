@@ -20,11 +20,14 @@ class EdenModel extends Events {
     // Run super
     super();
 
+    // set max listeners
+    this.setMaxListeners(0);
+
     // Set id
     this.__id = id;
     this.__data = opts;
     this.__type = type;
-    this.__queue = [];
+    this.__viewListeners = new Set();
 
     // Bind methods
     this.get = this.get.bind(this);
@@ -39,9 +42,37 @@ class EdenModel extends Events {
     this._update = this._update.bind(this);
     this._connect = this._connect.bind(this);
 
+    // set view
+    this.view = {
+      add    : this.viewAdd.bind(this),
+      remove : this.viewRemove.bind(this),
+    };
+
     // Build
     if (typeof eden !== 'undefined') this.building = this.build();
   }
+
+
+  // ////////////////////////////////////////////////////////////////////////////
+  //
+  // BUILD METHODS
+  //
+  // ////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Builds this
+   */
+  async build() {
+    // Listen
+    await this.listen();
+  }
+
+
+  // ////////////////////////////////////////////////////////////////////////////
+  //
+  // GET/SET METHODS
+  //
+  // ////////////////////////////////////////////////////////////////////////////
 
   /**
    * Returns data key
@@ -85,64 +116,55 @@ class EdenModel extends Events {
    * @param {Object} opts
    */
   setOpts(opts) {
-    // loop keys
-    for (let key in opts) {
-      // check value matches
-      if (this.__data[key] !== opts[key]) {
-        // set value
-        this.set(key, opts[key]);
-      }
-    }
+    // update
+    return this._update(opts);
   }
 
-  /**
-   * Builds this
-   */
-  async build() {
-    // Listen
-    await this.listen();
-  }
+
+  // ////////////////////////////////////////////////////////////////////////////
+  //
+  // VIEW METHODS
+  //
+  // ////////////////////////////////////////////////////////////////////////////
 
   /**
-   * Listens to model by id
+   * view add
    *
-   * @return {Promise}
+   * @param  {String} uuid
    */
-  async destroy() {
-    // Await building
-    await this.building;
-
-    // Check listening
-    await Promise.all(this.__queue);
-
-    // Check loading
-    if (!this.__isListening) return null;
-
-    // Create new promise
-    const promise = new Promise(async (resolve) => {
-      // Call eden
-      await eden.socket.call(`model.deafen.${this.__type}`, this.__id, this.__uuid);
-
-      // Set listen
-      this.__isListening = false;
-
-      // Add on event
-      eden.socket.off(`model.update.${this.__type}.${this.__id}`, this._update);
-
-      // Listen to connect again
-      eden.socket.off('connect', this._connect);
-      eden.socket.off('connected', this._connect);
-
-      // Resolve
-      resolve();
-    });
-
-    // Add to queue
-    this.__queue.push(promise);
-
-    // Return await deafening
-    return await promise;
+  viewAdd(id) {
+    // add uuid
+    this.__viewListeners.add(id);
   }
+
+  /**
+   * view add
+   *
+   * @param  {String} uuid
+   */
+  viewRemove(id) {
+    // add uuid
+    this.__viewListeners.delete(id);
+
+    // clear timeout
+    if (this.__viewTimeout) clearTimeout(this.__viewTimeout);
+
+    // set timeout
+    this.__viewTimeout = setTimeout(() => {
+      // check listeners
+      if (this.__viewListeners.length) return;
+
+      // deafen
+      this.destroy();
+    }, 5 * 1000);
+  }
+
+
+  // ////////////////////////////////////////////////////////////////////////////
+  //
+  // LISTEN METHODS
+  //
+  // ////////////////////////////////////////////////////////////////////////////
 
   /**
    * Refreshes this
@@ -163,6 +185,44 @@ class EdenModel extends Events {
    *
    * @return {Promise}
    */
+  async destroy() {
+    // Await building
+    await this.building;
+
+    // destroy
+    this.emit('destroy');
+
+    // check window
+    if (typeof window === 'undefined') return;
+
+    // Create new promise
+    const promise = new Promise(async (resolve) => {
+      // Call eden
+      await eden.socket.call(`model.deafen.${this.__type}`, this.__id, this.__uuid);
+
+      // Set listen
+      this.__isListening = false;
+
+      // Add on event
+      eden.socket.off(`model.update.${this.__type}.${this.__id}`, this._update);
+
+      // Listen to connect again
+      eden.socket.off('connect', this._connect);
+      eden.socket.off('connected', this._connect);
+
+      // Resolve
+      resolve();
+    });
+
+    // Return await deafening
+    return await promise;
+  }
+
+  /**
+   * Listens to model by id
+   *
+   * @return {Promise}
+   */
   async listen() {
     // Await building
     await this.building;
@@ -170,14 +230,11 @@ class EdenModel extends Events {
     // check id
     if (!this.__id) return null;
 
-    // Check listening
-    await Promise.all(this.__queue);
-
-    // Check loading
-    if (this.__isListening) return null;
-
     // Set uuid
     if (!this.__uuid) this.__uuid = uuid();
+
+    // check window
+    if (typeof window === 'undefined') return;
 
     // Create new promise
     const promise = new Promise(async (resolve) => {
@@ -198,12 +255,16 @@ class EdenModel extends Events {
       resolve();
     });
 
-    // Add to queue
-    this.__queue.push(promise);
-
     // Return listening promise
     return await promise;
   }
+
+
+  // ////////////////////////////////////////////////////////////////////////////
+  //
+  // PRIVATE METHODS
+  //
+  // ////////////////////////////////////////////////////////////////////////////
 
   /**
    * On update

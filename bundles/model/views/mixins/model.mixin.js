@@ -1,4 +1,7 @@
 
+// require uuid
+const uuid = require('uuid');
+
 // Require live model
 const EdenModel = require('model/public/js/model');
 
@@ -8,7 +11,35 @@ riot.mixin('model', {
    * On init function
    */
   init() {
+    // set of models
+    this.__models = new Map();
 
+    // on mount
+    this.on('mount', () => {
+      // Create model
+      if (!this.eden.frontend) return;
+
+      // uuid
+      this.__uuid = uuid();
+    });
+
+    // unmount
+    this.on('unmount', () => {
+      // Create model
+      if (!this.eden.frontend) return;
+
+      // loop models
+      for (const [key, value] of this.__models) {
+        // remove view listner
+        value.view.remove(this.__uuid);
+
+        // On update
+        value.removeListener('update', this.update);
+
+        // remove model
+        this.__models.delete(key);
+      }
+    });
   },
 
   /**
@@ -31,6 +62,12 @@ riot.mixin('model', {
 
     // return model
     const model = window.eden.model.get(type, object.id, object);
+
+    // uuid
+    model.view.add(this.__uuid);
+
+    // add to models
+    this.__models.set(`${type}.${object.id}`, model);
 
     // On update
     model.on('update', this.update);

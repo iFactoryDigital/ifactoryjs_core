@@ -48,6 +48,12 @@ class ModelStore extends Events {
     if (!this.__models.get(type).has(id)) {
       // alter model
       this.__models.get(type).set(id, new EdenModel(type, id, opts || {}));
+
+      // on remove
+      this.__models.get(type).get(id).on('destroy', () => {
+        // remove model
+        this.__models.get(type).delete(id);
+      });
     }
 
     // update model in place
