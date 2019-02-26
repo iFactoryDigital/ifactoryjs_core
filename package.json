@@ -1,7 +1,7 @@
 {
   "name": "@edenjs/core",
   "description": "",
-  "version": "2.4.3",
+  "version": "2.4.4",
   "dependencies": {
     "@edenjs/admin": "^1.2.9",
     "@edenjs/alert": "^1.0.2",
