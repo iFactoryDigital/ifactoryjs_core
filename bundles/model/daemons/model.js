@@ -7,7 +7,7 @@ const socket = helper('socket');
 /**
  * Create live daemon
  *
- * @compute 0
+ * @back
  * @extends daemon
  */
 class ModelDaemon extends Daemon {
