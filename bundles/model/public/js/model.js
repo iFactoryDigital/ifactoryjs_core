@@ -272,6 +272,9 @@ class EdenModel extends Events {
    * @param  {Object} object
    */
   _update(object) {
+    // set is updated
+    let isUpdated = false;
+
     // Update details
     for (const key of Object.keys(object)) {
       // Check differences
@@ -281,11 +284,14 @@ class EdenModel extends Events {
 
         // Emit event
         this.emit(key, object[key]);
+
+        // is updated
+        isUpdated = true;
       }
     }
 
     // Emit update
-    this.emit('update');
+    if (isUpdated) this.emit('update');
   }
 
   /**
