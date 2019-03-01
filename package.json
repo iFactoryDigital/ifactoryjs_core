@@ -1,15 +1,15 @@
 {
   "name": "@edenjs/core",
   "description": "",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "dependencies": {
-    "@edenjs/admin": "^1.2.9",
+    "@edenjs/admin": "^1.2.11",
     "@edenjs/alert": "^1.0.2",
     "@edenjs/asset": "^2.0.4",
     "@edenjs/cache": "^1.0.0",
     "@edenjs/cms": "^1.1.44",
     "@edenjs/email": "^1.0.0",
-    "@edenjs/form": "^1.0.0",
+    "@edenjs/form": "^1.0.1",
     "@edenjs/glob": "^1.0.0",
     "@edenjs/grid": "^1.0.20",
     "@edenjs/locale": "^2.0.11",
