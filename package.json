@@ -1,9 +1,9 @@
 {
   "name": "@edenjs/core",
   "description": "",
-  "version": "2.5.2",
+  "version": "2.5.3",
   "dependencies": {
-    "@edenjs/admin": "^1.2.12",
+    "@edenjs/admin": "^1.2.13",
     "@edenjs/alert": "^1.0.2",
     "@edenjs/asset": "^2.0.4",
     "@edenjs/cache": "^1.0.0",
