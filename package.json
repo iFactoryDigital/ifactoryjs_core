@@ -1,7 +1,7 @@
 {
   "name": "@edenjs/core",
   "description": "",
-  "version": "2.5.6",
+  "version": "2.5.7",
   "dependencies": {
     "@edenjs/admin": "^1.2.14",
     "@edenjs/alert": "^1.0.2",
@@ -16,7 +16,7 @@
     "@edenjs/menu": "^1.0.14",
     "@edenjs/meta": "^1.0.0",
     "@edenjs/riot": "^2.0.10",
-    "@edenjs/router": "^2.1.0",
+    "@edenjs/router": "^2.1.1",
     "@edenjs/serviceworker": "^2.0.13",
     "@edenjs/socket": "^2.2.0",
     "@edenjs/user": "^1.0.33",
