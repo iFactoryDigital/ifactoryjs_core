@@ -15,7 +15,7 @@
     "@edenjs/locale": "^2.0.11",
     "@edenjs/menu": "^1.0.14",
     "@edenjs/meta": "^1.0.0",
-    "@edenjs/pubsub-redis": "0.0.1",
+    "@edenjs/pubsub-redis": "^1.0.0",
     "@edenjs/riot": "^2.0.10",
     "@edenjs/router": "^2.1.1",
     "@edenjs/serviceworker": "^2.0.13",
