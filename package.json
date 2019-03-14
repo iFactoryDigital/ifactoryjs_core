@@ -1,13 +1,13 @@
 {
   "name": "@edenjs/core",
   "description": "",
-  "version": "2.6.4",
+  "version": "2.6.5",
   "dependencies": {
     "@edenjs/admin": "^1.2.14",
     "@edenjs/alert": "^1.0.2",
     "@edenjs/asset": "^2.0.6",
     "@edenjs/cache": "^1.0.0",
-    "@edenjs/cms": "^1.2.5",
+    "@edenjs/cms": "^1.2.6",
     "@edenjs/email": "^1.0.0",
     "@edenjs/form": "^1.1.0",
     "@edenjs/glob": "^1.0.0",
