@@ -34,7 +34,7 @@ class ModelHelper extends helper {
     if (!listenModel || !listenModel.get('_id')) return;
 
     // Call local
-    return this.eden.thread('back', 0).call('model.deafen', sessionID, listenModel.constructor.name.toLowerCase(), listenModel.get('_id').toString(), listenID);
+    return this.eden.thread(['back', 'model']).call('model.deafen', sessionID, listenModel.constructor.name.toLowerCase(), listenModel.get('_id').toString(), listenID);
   }
 
   /**
@@ -52,7 +52,7 @@ class ModelHelper extends helper {
     if (!listenModel || !listenModel.get('_id')) return;
 
     // Call local
-    return this.eden.thread('back', 0).call('model.listen', sessionID, listenModel.constructor.name.toLowerCase(), listenModel.get('_id').toString(), listenID, atomic);
+    return this.eden.thread(['back', 'model']).call('model.listen', sessionID, listenModel.constructor.name.toLowerCase(), listenModel.get('_id').toString(), listenID, atomic);
   }
 }
 

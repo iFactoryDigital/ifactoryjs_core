@@ -8,6 +8,8 @@ const socket = helper('socket');
  * Create live daemon
  *
  * @cluster back
+ * @cluster model
+ *
  * @extends daemon
  */
 class ModelDaemon extends Daemon {
@@ -37,6 +39,8 @@ class ModelDaemon extends Daemon {
    */
   build() {
     // Add endpoint for listen
+    this.eden.endpoint('model.listen', this._listen);
+    this.eden.endpoint('model.deafen', this._deafen);
     this.eden.endpoint('model.listen', this._listen, true);
     this.eden.endpoint('model.deafen', this._deafen, true);
 
