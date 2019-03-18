@@ -1,7 +1,7 @@
 {
   "name": "@edenjs/core",
   "description": "",
-  "version": "2.6.11",
+  "version": "2.6.12",
   "dependencies": {
     "@edenjs/admin": "^1.2.14",
     "@edenjs/alert": "^1.0.2",
@@ -9,7 +9,7 @@
     "@edenjs/cache": "^1.0.0",
     "@edenjs/cms": "^1.2.7",
     "@edenjs/email": "^1.0.0",
-    "@edenjs/form": "^1.1.2",
+    "@edenjs/form": "^1.1.3",
     "@edenjs/glob": "^1.0.0",
     "@edenjs/grid": "^1.1.0",
     "@edenjs/locale": "^2.0.11",
