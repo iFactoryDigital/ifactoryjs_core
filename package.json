@@ -1,7 +1,7 @@
 {
   "name": "@edenjs/core",
   "description": "",
-  "version": "2.6.27",
+  "version": "2.6.30",
   "dependencies": {
     "@edenjs/admin": "^1.2.14",
     "@edenjs/alert": "^1.0.2",
@@ -19,7 +19,7 @@
     "@edenjs/riot": "^2.0.10",
     "@edenjs/router": "^2.1.4",
     "@edenjs/serviceworker": "^2.1.0",
-    "@edenjs/socket": "^2.3.1",
+    "@edenjs/socket": "^2.3.2",
     "@edenjs/user": "^1.1.1",
     "bootstrap": "^4.3.1",
     "dot-prop": "^4.2.0",
