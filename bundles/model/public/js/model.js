@@ -152,7 +152,7 @@ class EdenModel extends Events {
     // set timeout
     this.__viewTimeout = setTimeout(() => {
       // check listeners
-      if (this.__viewListeners.length) return;
+      if (this.__viewListeners.size) return;
 
       // deafen
       this.destroy();
