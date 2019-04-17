@@ -134,7 +134,7 @@ class EdenModel extends Events {
    */
   viewAdd(id) {
     // add uuid
-    this.__viewListeners.add(id);
+    if (id) this.__viewListeners.add(id);
   }
 
   /**
