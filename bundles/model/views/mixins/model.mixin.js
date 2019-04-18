@@ -12,10 +12,8 @@ riot.mixin('model', {
    */
   init() {
     // set of models
-    this.__models = new Map();
-
-    // uuid
     this.__uuid = uuid();
+    this.__models = new Map();
 
     // unmount
     this.on('unmount', () => {
