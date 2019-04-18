@@ -14,14 +14,8 @@ riot.mixin('model', {
     // set of models
     this.__models = new Map();
 
-    // on mount
-    this.on('mount', () => {
-      // Create model
-      if (!this.eden.frontend) return;
-
-      // uuid
-      this.__uuid = uuid();
-    });
+    // uuid
+    this.__uuid = uuid();
 
     // unmount
     this.on('unmount', () => {
