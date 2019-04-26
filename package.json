@@ -9,7 +9,7 @@
     "@edenjs/cache": "^1.0.0",
     "@edenjs/cms": "^1.2.16",
     "@edenjs/email": "^1.1.0",
-    "@edenjs/form": "^1.1.4",
+    "@edenjs/form": "^1.3.1",
     "@edenjs/glob": "^1.0.0",
     "@edenjs/grid": "^1.1.1",
     "@edenjs/locale": "^2.0.11",

@@ -43,6 +43,9 @@ riot.mixin('model', {
    * @return {FEModel}
    */
   model(type, object) {
+    // check uuid
+    if (!this.__uuid) this.__uuid = uuid();
+
     // Create model
     if (!this.eden.frontend) {
       // create model
