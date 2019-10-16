@@ -12,7 +12,7 @@
       <p>
         <a class="btn btn-lg btn-primary mr-3" href="//edenjs.com" role="button">Read the docs »</a>
 
-        <a class="btn btn-lg btn-secondary" href="//github.com/eden-js/eden" role="button">Read the source »</a>
+        <a class="btn btn-lg btn-secondary" href="//github.com/ifactorydigital/ifactoryjs_eden" role="button">Read the source »</a>
       </p>
     </div>
   </section>
