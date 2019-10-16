@@ -8,6 +8,7 @@
     "@ifactoryjs/asset": "github:ifactorydigital/ifactoryjs_asset",
     "@ifactoryjs/cache": "github:ifactorydigital/ifactoryjs_cache",
     "@ifactoryjs/cms": "github:ifactorydigital/ifactoryjs_cms",
+    "@ifactoryjs/editable": "github:ifactorydigital/ifactoryjs_editable",
     "@ifactoryjs/email": "github:ifactorydigital/ifactoryjs_email",
     "@ifactoryjs/form": "github:ifactorydigital/ifactoryjs_form",
     "@ifactoryjs/grid": "github:ifactorydigital/ifactoryjs_grid",
